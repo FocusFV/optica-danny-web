@@ -1,17 +1,28 @@
 export default function About() {
   return (
-    <section className="py-20 px-6 bg-white text-center"> {/* Cambié a bg-white */}
-      <h2 className="text-4xl font-bold mb-8 text-black">¿Qué es Improflow?</h2> {/* Agregué text-black */}
-      <p className="max-w-2xl mx-auto text-lg text-gray-800 leading-relaxed"> {/* Agregué text-gray-800 */}
-        Somos un colectivo creativo que fusiona la espontaneidad de la improvisación teatral 
-        con el rigor estratégico del mundo empresarial. En Improflow, transformamos el error 
-        y la creatividad en herramientas de liderazgo, comunicación y resiliencia.
-      </p>
-      <p className="max-w-2xl mx-auto mt-4 text-lg text-gray-800 leading-relaxed">
-        Liderado por Federico Villalba en la parte operativa, el actor profesional Alesis Fleitas 
-        y la visión estratégica de Eduardo "Lalo" Hernández, creamos experiencias donde la 
-        improvisación no es solo juego, es un activo táctico para emprendedores.
-      </p>
+    <section className="py-20 px-6 md:px-20 border-b border-[#c5a059]/20">
+      <div className="max-w-4xl mx-auto">
+        <h2 className="text-3xl md:text-4xl font-bold text-[#c5a059] mb-8 uppercase tracking-widest">
+          ¿Quiénes Somos?
+        </h2>
+        <div className="grid md:grid-cols-2 gap-12 items-center">
+          <div className="space-y-4">
+            <p className="text-gray-300 leading-relaxed">
+              Improflow nace de la fusión cultural y creativa entre Argentina y México. 
+              Somos un equipo de profesionales dedicados a la improvisación teatral 
+              como herramienta de desarrollo humano y corporativo.
+            </p>
+            <p className="text-gray-300 leading-relaxed">
+              Creemos que la escucha, la aceptación y la creatividad son las claves 
+              para transformar entornos de trabajo y escenarios artísticos.
+            </p>
+          </div>
+          {/* Espacio para una imagen o logo */}
+          <div className="bg-[#0f172a] h-64 rounded-lg border border-[#c5a059] flex items-center justify-center">
+            <span className="text-[#c5a059]/50 font-bold">LOGO / FOTO</span>
+          </div>
+        </div>
+      </div>
     </section>
   );
 }
