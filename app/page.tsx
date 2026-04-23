@@ -1,30 +1,65 @@
 import Navbar from '../components/Navbar';
 import About from '../components/About';
 import Shows from '../components/Shows';
+import FadeIn from '../components/FadeIn';
 import Footer from '../components/Footer';
+
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-[#0a0a0a] text-white">
-      {/* Navbar con estilo corporativo */}
-      <Navbar />
+    <main className="min-h-screen bg-[#050505] text-white relative selection:bg-[#c5a059] selection:text-black">
+      
+      {/* Efectos de fondo Premium (Grilla sutil + Foco de luz) */}
+      <div className="fixed inset-0 z-0 pointer-events-none bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#1a1a1a] via-[#050505] to-[#050505]"></div>
+      <div className="fixed inset-0 z-0 opacity-[0.02] pointer-events-none" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'1\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")' }}></div>
 
-      {/* Hero Section */}
-      <section className="py-24 px-6 text-center border-b border-[#c5a059]/30">
-        <h1 className="text-5xl md:text-6xl font-bold mb-6">
-          Conectando Escenarios: <span className="text-[#c5a059]">México ↔ Argentina</span>
-        </h1>
-        <p className="text-xl text-gray-400 max-w-2xl mx-auto">
-          Impro teatral profesional y soluciones estratégicas para empresas.
-        </p>
-      </section>
+      <div className="relative z-10">
+        <Navbar />
 
-      {/* Secciones de contenido */}
-      <About />
-      <Shows />
+        {/* Hero Section (Pantalla Principal Cinematográfica) */}
+        <section className="relative min-h-screen flex flex-col justify-center items-center px-6 pt-20">
+          <FadeIn>
+            <div className="text-center flex flex-col items-center">
+              <span className="inline-block py-1 px-3 border border-[#c5a059]/30 bg-[#c5a059]/10 text-[#c5a059] text-[9px] font-bold tracking-[0.4em] uppercase mb-8 rounded-full">
+                Arte & Estrategia
+              </span>
+              
+              <h1 className="text-7xl md:text-[10rem] font-black tracking-tighter leading-[0.85] mb-8">
+                <span className="block text-transparent bg-clip-text bg-gradient-to-b from-white to-white/50 drop-shadow-lg">
+                  IMPRO
+                </span>
+                <span className="block text-transparent bg-clip-text bg-gradient-to-b from-[#c5a059] to-[#8a6b32] drop-shadow-lg">
+                  FLOW
+                </span>
+              </h1>
+              
+              {/* Línea divisoria elegante */}
+              <div className="w-px h-24 bg-gradient-to-b from-[#c5a059] to-transparent mx-auto my-10"></div>
+              
+              <p className="text-gray-400 text-xs md:text-sm uppercase tracking-[0.5em] font-light max-w-xl mx-auto">
+                Conectando escenarios entre <span className="text-white font-medium">México</span> y <span className="text-white font-medium">Argentina</span>
+              </p>
+            </div>
+          </FadeIn>
+        </section>
 
-      {/* Footer */}
-      <Footer />
+        {/* Contenedor Principal */}
+        <div className="max-w-7xl mx-auto px-6 space-y-40 pb-40">
+          <FadeIn><About /></FadeIn>
+          <FadeIn><Shows /></FadeIn>
+        </div>
+
+        {/* Footer Minimalista de Alta Gama */}
+        <footer className="py-12 border-t border-white/5 relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-t from-[#c5a059]/5 to-transparent pointer-events-none"></div>
+          <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center text-[9px] tracking-[0.3em] uppercase text-white/40">
+            <p className="mb-4 md:mb-0">© 2026 IMPROFLOW. Todos los derechos reservados.</p>
+            <p className="hover:text-[#c5a059] transition-colors cursor-pointer">
+              Diseño Visual por <span className="text-white">FocusFV</span>
+            </p>
+          </div>
+        </footer>
+      </div>
     </main>
   );
 }

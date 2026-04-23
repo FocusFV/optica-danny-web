@@ -1,15 +1,35 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
-:root {
-  --background-dark: #0a0a0a; /* Un negro casi puro para el fondo */
-  --gold: #c5a059;          /* Tu dorado de la referencia */
-  --blue-corp: #0f172a;      /* Azul oscuro corporativo */
-}
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  body {
+    background-color: #050505 !important;
+    color: #ffffff !important;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
 
-body {
-  background-color: var(--background-dark);
-  color: white;
-  font-family: sans-serif;
+  /* Selección de texto premium */
+  ::selection {
+    background-color: #c5a059;
+    color: #000000;
+  }
+
+  /* Barra de scroll personalizada */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #050505;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #1f2937;
+    border-radius: 4px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #c5a059;
+  }
 }
