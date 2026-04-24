@@ -1,9 +1,12 @@
 import Navbar from '../components/Navbar';
 import About from '../components/About';
+import Creators from '../components/Creators';
 import Shows from '../components/Shows';
 import FadeIn from '../components/FadeIn';
 import Footer from '../components/Footer';
-
+import Marquee from '../components/Marquee';
+import Gallery from '../components/Gallery';
+import Contact from '../components/Contact';
 
 export default function Home() {
   return (
@@ -43,23 +46,25 @@ export default function Home() {
           </FadeIn>
         </section>
 
-        {/* Contenedor Principal */}
+     {/* Contenedor Principal */}
         <div className="max-w-7xl mx-auto px-6 space-y-40 pb-40">
           <FadeIn><About /></FadeIn>
-          <FadeIn><Shows /></FadeIn>
         </div>
 
-        {/* Footer Minimalista de Alta Gama */}
-        <footer className="py-12 border-t border-white/5 relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-t from-[#c5a059]/5 to-transparent pointer-events-none"></div>
-          <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center text-[9px] tracking-[0.3em] uppercase text-white/40">
-            <p className="mb-4 md:mb-0">© 2026 IMPROFLOW. Todos los derechos reservados.</p>
-            <p className="hover:text-[#c5a059] transition-colors cursor-pointer">
-              Diseño Visual por <span className="text-white">FocusFV</span>
-            </p>
-          </div>
-        </footer>
+        {/* CINTA INFINITA ACÁ AFUERA DEL CONTENEDOR PARA QUE OCUPE TODA LA PANTALLA */}
+        <Marquee />
+
+     <div className="max-w-7xl mx-auto px-6 space-y-40 pb-40 pt-20">
+          <FadeIn><Creators /></FadeIn> 
+          <FadeIn><Gallery /></FadeIn>
+          <FadeIn><Contact /></FadeIn> {/* <-- ACÁ CLAVAMOS EL FORM */}
+          {/* <FadeIn><Shows /></FadeIn> */}
+        </div>
+
+        {/* Footer Minimalista de Alta Gama importado como componente */}
+        <Footer />
       </div>
+      
     </main>
   );
 }

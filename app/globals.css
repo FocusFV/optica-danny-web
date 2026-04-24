@@ -33,3 +33,10 @@
     background: #c5a059;
   }
 }
+@keyframes correr {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.cinta-infinita {
+  animation: correr 20s linear infinite !important;
+}
