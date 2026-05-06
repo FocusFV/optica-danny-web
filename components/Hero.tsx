@@ -45,11 +45,11 @@ export default function Hero() {
               className="absolute inset-0 bg-[#c5a059]/25 blur-[100px] rounded-full z-0"
             />
             <motion.img 
-              src="/ImproFlowLogo.png" 
+              src="/ImproflowLogo.png" 
               alt="Improflow" 
               animate={{
                 y: [0, -15, 0],
-                scale: [1, 1.03, 1],
+                scale: [1, 1.03, 1], // ACÁ ESTABA EL ERROR (borré el 'np' que sobraba)
                 filter: [
                   "brightness(1) saturate(1.2) contrast(1)",
                   "brightness(1.5) saturate(2) contrast(1.1)",
@@ -65,18 +65,15 @@ export default function Hero() {
         {/* INDICADOR DE SCROLL RENOVADO */}
         <motion.div 
           style={{ opacity }}
-          // "left-0 w-full" asegura el centrado total en cualquier pantalla
           className="absolute bottom-10 left-0 w-full flex flex-col items-center justify-center gap-3 z-30 pointer-events-none"
         >
            <div className="flex flex-col items-center gap-3">
-             {/* Texto más visible, con más tracking y peso */}
              <div className="px-4 py-1.5 bg-black/20 backdrop-blur-md rounded-full border border-white/5">
                 <span className="text-[9px] md:text-[10px] text-white font-black uppercase tracking-[0.6em] whitespace-nowrap">
                   Scroll para revelar
                 </span>
              </div>
              
-             {/* La línea animada que invita a bajar */}
              <div className="relative w-[1.5px] h-16 bg-white/10 overflow-hidden rounded-full">
                 <motion.div 
                   animate={{ 
