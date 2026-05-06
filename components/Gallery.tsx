@@ -31,7 +31,7 @@ export default function Gallery() {
               <img 
                 src={src} 
                 alt={`Improflow Galería ${i + 1}`}
-                className="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-110 transition-all duration-700 ease-in-out"
+              className="w-full h-full object-cover grayscale active:grayscale-0 md:group-hover:grayscale-0 active:scale-105 md:group-hover:scale-110 transition-all duration-700 ease-in-out"
               />
               {/* Sombreado sutil en la base */}
               <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-transparent to-transparent opacity-50"></div>

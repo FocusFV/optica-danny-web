@@ -1,25 +1,108 @@
+"use client";
+
+import React, { useEffect, useState } from 'react';
+import Image from 'next/image';
+import { FaFacebookF, FaInstagram, FaTiktok, FaYoutube } from 'react-icons/fa';
+
 export default function Footer() {
+  const [mounted, setMounted] = useState(false);
+  const [time, setTime] = useState(new Date());
+
+  useEffect(() => {
+    setMounted(true);
+    const timer = setInterval(() => setTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  // Función para la hora local del que mira la página
+  const getLocalTime = () => {
+    return time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+  };
+
+  // Función para la hora de Argentina (fija en UTC-3)
+  const getArgentinaTime = () => {
+    const d = new Date(time.getTime() + (time.getTimezoneOffset() * 60000) + (-3 * 3600000));
+    return d.getHours().toString().padStart(2, '0') + ":" + 
+           d.getMinutes().toString().padStart(2, '0');
+  };
+
+  if (!mounted) return null;
+
   return (
-    <footer className="relative py-16 border-t border-white/5 overflow-hidden mt-32">
-      {/* Resplandor inferior */}
-      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-3/4 h-24 bg-[#c5a059]/10 blur-[80px] pointer-events-none"></div>
+    <footer className="py-16 bg-transparent relative overflow-hidden">
+      <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#c5a059]/50 to-transparent"></div>
       
-      <div className="max-w-7xl mx-auto px-6 flex flex-col items-center">
-        <div className="text-white font-bold tracking-[0.4em] text-xl uppercase mb-8 opacity-20">
-          IMPROFLOW
-        </div>
-        
-        <div className="flex gap-8 mb-12 text-[10px] uppercase tracking-widest text-gray-500">
-          <a href="#" className="hover:text-[#c5a059] transition-colors">Instagram</a>
-          <a href="#" className="hover:text-[#c5a059] transition-colors">LinkedIn</a>
-          <a href="#" className="hover:text-[#c5a059] transition-colors">Contacto</a>
+      <div className="max-w-7xl mx-auto px-6 relative z-10">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-16 items-start text-center md:text-left">
+          
+          {/* Manifiesto */}
+          <div className="space-y-4">
+            <h2 className="text-xl font-black tracking-widest text-white uppercase">
+              IMPRO<span className="text-[#c5a059]">FLOW</span>
+            </h2>
+            <p className="text-gray-400 text-[11px] leading-relaxed tracking-widest uppercase font-light max-w-xs mx-auto md:mx-0">
+              Fusión teatral de Argentina y México. Elevando el arte de la improvisación a un estándar cinematográfico.
+            </p>
+          </div>
+
+          {/* Redes Sociales - PONÉ TUS LINKS ACÁ */}
+          <div className="flex flex-col items-center space-y-6">
+            <span className="text-[11px] tracking-[0.5em] text-white/60 uppercase font-bold">Seguinos</span>
+            <div className="grid grid-cols-2 gap-x-12 gap-y-6">
+              <a href="https://facebook.com/TU_LINK" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-xs uppercase tracking-widest text-white/80 hover:text-[#c5a059] transition-all group">
+                <FaFacebookF size={16} className="group-hover:scale-125 transition-transform" /> 
+                <span className="font-medium">Facebook</span>
+              </a>
+              <a href="https://instagram.com/TU_LINK" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-xs uppercase tracking-widest text-white/80 hover:text-[#c5a059] transition-all group">
+                <FaInstagram size={16} className="group-hover:scale-125 transition-transform" /> 
+                <span className="font-medium">Instagram</span>
+              </a>
+              <a href="https://tiktok.com/@TU_LINK" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-xs uppercase tracking-widest text-white/80 hover:text-[#c5a059] transition-all group">
+                <FaTiktok size={16} className="group-hover:scale-125 transition-transform" /> 
+                <span className="font-medium">TikTok</span>
+              </a>
+              <a href="https://youtube.com/@TU_LINK" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-xs uppercase tracking-widest text-white/80 hover:text-[#c5a059] transition-all group">
+                <FaYoutube size={16} className="group-hover:scale-125 transition-transform" /> 
+                <span className="font-medium">YouTube</span>
+              </a>
+            </div>
+          </div>
+
+          {/* Relojes Inteligentes */}
+          <div className="md:text-right space-y-4">
+            <span className="text-[11px] tracking-[0.5em] text-white/60 uppercase block mb-4 font-bold">Local Time</span>
+            <div className="text-sm tracking-[0.2em] text-gray-400 uppercase font-mono space-y-2">
+              {/* Este reloj se adapta al que mira la web */}
+              <p>Tu Hora <span className="text-white ml-2">{getLocalTime()} HS</span></p>
+              {/* Este se queda fijo en hora argentina */}
+              <p>Argentina <span className="text-[#c5a059] ml-2">{getArgentinaTime()} HS</span></p>
+            </div>
+          </div>
         </div>
 
-        <div className="w-full border-t border-white/5 pt-8 flex flex-col md:flex-row justify-between items-center text-[9px] tracking-[0.3em] uppercase text-white/30">
-          <p className="mb-4 md:mb-0">© {new Date().getFullYear()} IMPROFLOW. Todos los derechos reservados.</p>
-          <p className="hover:text-[#c5a059] transition-colors cursor-default">
-            Design & Code by <span className="text-white font-medium">FocusFV</span>
-          </p>
+        {/* Firma con Logo */}
+        <div className="pt-10 border-t border-white/10 flex flex-col items-center">
+          <div className="flex flex-col items-center group mb-8">
+            <span className="text-[9px] tracking-[1em] text-gray-500 uppercase mb-6">Produced by</span>
+            <div className="relative w-48 h-24 transition-transform duration-500 group-hover:scale-105">
+              <Image 
+                src="/FocusFVLogo.png" 
+                alt="FocusFV Logo"
+                fill
+                className="object-contain drop-shadow-[0_0_15px_rgba(197,160,89,0.3)]"
+              />
+            </div>
+          </div>
+          
+          <div className="text-[10px] tracking-[0.5em] text-gray-400 uppercase flex flex-col items-center gap-4">
+            <p className="font-medium">© 2026 Improflow Collective. All rights reserved.</p>
+            <div className="flex flex-wrap justify-center gap-3 text-gray-600 text-[9px]">
+              <p>Mérida</p><span>•</span>
+              <p>Rosario</p><span>•</span>
+              <p>Tucumán</p><span>•</span>
+              <p>Córdoba</p>
+            </div>
+          </div>
         </div>
       </div>
     </footer>

@@ -23,7 +23,7 @@ export default function Creators() {
       role: "Producción Visual & Operativa",
       bio: "El ojo detrás de FocusFV. Responsable de la estructura, la técnica y de que cada detalle visual de Improflow sea impecable.",
       image: "https://i.imgur.com/T7gyife.png", // Dejá el link que ya tenías puesto
-      ig: "https://instagram.com/fede_tu_usuario", // <-- PEGA EL LINK DE IG ACÁ
+      ig: "https://www.instagram.com/villalba.fede/", // <-- PEGA EL LINK DE IG ACÁ
       in: "https://www.linkedin.com/in/federicovillalba/" // <-- PEGA EL LINK DE LINKEDIN ACÁ
     }
   ];
@@ -50,7 +50,7 @@ export default function Creators() {
                 <img 
                   src={member.image} 
                   alt={member.name}
-                  className="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-110 transition-all duration-700 ease-in-out"
+                  className="w-full h-full object-cover grayscale active:grayscale-0 md:group-hover:grayscale-0 active:scale-105 md:group-hover:scale-110 transition-all duration-700 ease-in-out"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-transparent to-transparent opacity-60"></div>
               </div>
