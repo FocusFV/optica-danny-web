@@ -60,7 +60,7 @@ export default function Packages() {
   const [formData, setFormData] = useState({ nombre: '', celular: '', institucion: '', ciudad: '' });
 
   // CONFIGURÁ TU TELÉFONO ACÁ (Sin el +, solo números)
-  const WHATSAPP_NUMBER = "521999XXXXXXX"; 
+  const WHATSAPP_NUMBER = "5219992207996"; 
 
   const handleOpen = (pkgName: string) => {
     setSelectedPkg(pkgName);
