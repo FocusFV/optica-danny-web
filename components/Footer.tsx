@@ -94,7 +94,7 @@ export default function Footer() {
           </div>
           
           <div className="text-[10px] tracking-[0.5em] text-gray-400 uppercase flex flex-col items-center gap-4">
-            <p className="font-medium">© 2026 Improflow Collective. All rights reserved.</p>
+            <p className="font-medium">© 2026 Improflow. All rights reserved.</p>
             <div className="flex flex-wrap justify-center gap-3 text-gray-600 text-[9px]">
               <p>Mérida</p><span>•</span>
               <p>Rosario</p><span>•</span>
