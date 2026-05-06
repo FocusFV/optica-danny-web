@@ -7,43 +7,43 @@ const packages = [
   {
     id: 1,
     name: "Show Único",
-    icon: <Zap size={24} />,
+    icon: Zap,
     features: [
       "1 función de 60 minutos",
       "Hasta 300-400 estudiantes",
       "Material pedagógico post-show"
     ],
-    price: "Consultar",
+    price: "$5000 MXN",
     recommended: false
   },
   {
     id: 2,
     name: "Ciclo Improflow",
-    icon: <Star size={24} />,
+    icon: Star,
     features: [
       "3 funciones en 1 año (inicio, mitad, cierre)",
       "10% de descuento incluido",
       "Reunión de planificación incluida"
     ],
-    price: "Recomendado",
+    price: "$13000 MXN",
     recommended: true
   },
   {
     id: 3,
     name: "Taller + Show",
-    icon: <Users size={24} />,
+    icon: Users,
     features: [
       "Show 60 min + Taller 90 min para docentes",
       "Certificado incluido",
       "Material de apoyo exclusivo"
     ],
-    price: "Consultar",
+    price: "$8000 MXN",
     recommended: false
   },
   {
     id: 4,
     name: "Residencia Artística",
-    icon: <Trophy size={24} />,
+    icon: Trophy,
     features: [
       "Semana completa: 2 shows + 2 talleres",
       "Sesión de planificación estratégica",
@@ -103,10 +103,12 @@ export default function Packages() {
                 </div>
               )}
 
+              {/* ICONO RENDERIZADO COMO COMPONENTE - Soluciona error TS */}
               <div className={`mb-8 p-3 rounded-xl w-fit ${pkg.recommended ? 'bg-[#c5a059]/20' : 'bg-white/5'}`}>
-                {React.cloneElement(pkg.icon as React.ReactElement, { 
-                  className: pkg.recommended ? "text-[#c5a059]" : "text-white/40" 
-                })}
+                <pkg.icon 
+                  size={24} 
+                  className={pkg.recommended ? "text-[#c5a059]" : "text-white/40"} 
+                />
               </div>
               
               <h3 className="text-xl font-bold text-white mb-8 tracking-tight uppercase">
@@ -150,11 +152,10 @@ export default function Packages() {
         </div>
       </div>
 
-      {/* MODAL POP-UP PREMIUM */}
+      {/* MODAL POP-UP */}
       {isOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/90 backdrop-blur-md">
           <div className="relative w-full max-w-md bg-[#0a0a0a] border border-white/10 p-10 rounded-3xl shadow-[0_0_50px_rgba(0,0,0,1)]">
-            {/* Botón Cerrar */}
             <button 
               onClick={() => setIsOpen(false)} 
               className="absolute top-6 right-6 text-gray-500 hover:text-[#c5a059] transition-colors"
@@ -162,39 +163,37 @@ export default function Packages() {
               <X size={24}/>
             </button>
 
-            {/* Encabezado del Form */}
             <div className="mb-8">
               <h3 className="text-2xl font-black text-white uppercase tracking-tighter mb-2">
                 Solicitar <span className="text-[#c5a059]">{selectedPkg}</span>
               </h3>
               <div className="w-12 h-[2px] bg-[#c5a059] mb-4"></div>
               <p className="text-[9px] text-gray-500 uppercase tracking-[0.3em] font-bold">
-                Dejanos tus datos para coordinar la función
+                Dejanos tus datos para coordinar
               </p>
             </div>
             
-            {/* Formulario */}
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-1">
-                <label className="text-[9px] uppercase tracking-widest text-white-600 ml-1">Nombre Completo</label>
+                <label className="text-[8px] uppercase tracking-widest text-gray-600 ml-1">Nombre Completo</label>
                 <input required type="text" className="w-full bg-white/[0.03] border border-white/10 rounded-xl p-4 text-white text-xs uppercase tracking-widest focus:border-[#c5a059] focus:bg-white/[0.07] outline-none transition-all" onChange={(e) => setFormData({...formData, nombre: e.target.value})} />
               </div>
               <div className="space-y-1">
-                <label className="text-[9px] uppercase tracking-widest text-white-600 ml-1">WhatsApp</label>
+                <label className="text-[8px] uppercase tracking-widest text-gray-600 ml-1">WhatsApp</label>
                 <input required type="text" className="w-full bg-white/[0.03] border border-white/10 rounded-xl p-4 text-white text-xs uppercase tracking-widest focus:border-[#c5a059] focus:bg-white/[0.07] outline-none transition-all" onChange={(e) => setFormData({...formData, celular: e.target.value})} />
               </div>
               <div className="space-y-1">
-                <label className="text-[9px] uppercase tracking-widest text-white-600 ml-1">Institución / Empresa</label>
+                <label className="text-[8px] uppercase tracking-widest text-gray-600 ml-1">Institución / Empresa</label>
                 <input required type="text" className="w-full bg-white/[0.03] border border-white/10 rounded-xl p-4 text-white text-xs uppercase tracking-widest focus:border-[#c5a059] focus:bg-white/[0.07] outline-none transition-all" onChange={(e) => setFormData({...formData, institucion: e.target.value})} />
               </div>
               <div className="space-y-1">
-                <label className="text-[9px] uppercase tracking-widest text-white-600 ml-1">Ciudad</label>
+                <label className="text-[8px] uppercase tracking-widest text-gray-600 ml-1">Ciudad</label>
                 <input required type="text" className="w-full bg-white/[0.03] border border-white/10 rounded-xl p-4 text-white text-xs uppercase tracking-widest focus:border-[#c5a059] focus:bg-white/[0.07] outline-none transition-all" onChange={(e) => setFormData({...formData, ciudad: e.target.value})} />
               </div>
 
               <button 
                 type="submit" 
-                className="w-full py-5 bg-[#c5a059] text-black font-black uppercase text-[10px] tracking-[0.4em] rounded-xl hover:bg-white hover:scale-[1.02] active:scale-95 transition-all mt-6 shadow-[0_10px_20px_rgba(197,160,89,0.2)]"
+                className="w-full py-5 bg-[#c5a059] text-black font-black uppercase text-[10px] tracking-[0.4em] rounded-xl hover:bg-white hover:scale-[1.02] active:scale-95 transition-all mt-6"
               >
                 Enviar vía WhatsApp
               </button>
