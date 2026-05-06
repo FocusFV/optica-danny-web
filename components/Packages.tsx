@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState } from 'react';
+import { motion } from 'framer-motion'; // Importamos motion
 import { Check, Zap, Star, Users, Trophy, X } from 'lucide-react';
-// Importamos la librería del teléfono y sus estilos básicos
 import 'react-phone-number-input/style.css';
 import PhoneInput from 'react-phone-number-input';
 
@@ -63,7 +63,6 @@ export default function Packages() {
   const [formData, setFormData] = useState({ nombre: '', institucion: '', ciudad: '' });
   const [phone, setPhone] = useState<string | undefined>();
 
-  // CONFIGURÁ TU TELÉFONO ACÁ
   const WHATSAPP_NUMBER = "529992207996"; 
 
   const handleOpen = (pkgName: string) => {
@@ -73,18 +72,14 @@ export default function Packages() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Mensaje ultra pro con emojis y negritas para que lo leas de un vistazo
     const mensaje = `¡Hola equipo de Improflow! 🎭✨\n\nSoy *${formData.nombre}* de la institución *${formData.institucion}* (📍 ${formData.ciudad}).\n\nMe contacto porque nos interesa reservar la experiencia: 🌟 *${selectedPkg}* 🌟.\n\nLes dejo mi WhatsApp directo: 📱 ${phone}.\n\n¡Quedo a la espera para coordinar! 🤝`;
-    
-    const url = `https://wa.me/${529992207996}?text=${encodeURIComponent(mensaje)}`;
+    const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(mensaje)}`;
     window.open(url, '_blank');
     setIsOpen(false);
   };
 
   return (
     <section className="py-24 px-6 relative bg-transparent" id="paquetes">
-      {/* Estilos globales para que el selector de teléfono no rompa el diseño oscuro */}
       <style jsx global>{`
         .PhoneInput {
           background: rgba(255, 255, 255, 0.03);
@@ -112,12 +107,6 @@ export default function Packages() {
           background: #0a0a0a !important;
           color: white !important;
         }
-        /* Arreglo para las banderas en modo oscuro */
-        .PhoneInputCountryIcon {
-          width: 20px;
-          height: auto;
-          box-shadow: 0 0 5px rgba(0,0,0,0.5);
-        }
       `}</style>
 
       <div className="max-w-7xl mx-auto">
@@ -132,25 +121,36 @@ export default function Packages() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {packages.map((pkg) => (
-            <div 
+            <motion.div 
               key={pkg.id}
-              className={`relative flex flex-col p-8 rounded-2xl border transition-all duration-700 hover:-translate-y-3 ${
-                pkg.recommended 
-                ? 'bg-white/[0.08] border-[#c5a059]/50 shadow-[0_20px_50px_rgba(197,160,89,0.15)]' 
-                : 'bg-black/20 border-white/5 hover:border-white/20 shadow-2xl'
-              } backdrop-blur-2xl`}
+              // EFECTO DE ILUMINACIÓN POR SCROLL
+              initial={{ 
+                opacity: 0.6,
+                borderColor: 'rgba(255, 255, 255, 0.05)',
+                boxShadow: '0 0 0px rgba(0,0,0,0)'
+              }}
+              whileInView={{ 
+                opacity: 1,
+                borderColor: pkg.recommended ? 'rgba(197, 160, 89, 0.5)' : 'rgba(255, 255, 255, 0.2)',
+                boxShadow: pkg.recommended 
+                  ? '0 10px 40px rgba(197, 160, 89, 0.15)' 
+                  : '0 10px 30px rgba(0,0,0,0.4)'
+              }}
+              viewport={{ 
+                once: false, 
+                amount: 0.5 // Se activa cuando la tarjeta está a mitad de pantalla
+              }}
+              transition={{ duration: 0.8, ease: "easeOut" }}
+              className={`relative flex flex-col p-8 rounded-2xl border transition-all duration-500 bg-[#0a0a0a]/40 backdrop-blur-2xl`}
             >
               {pkg.recommended && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#c5a059] text-black text-[9px] font-black px-6 py-1 rounded-full uppercase tracking-[0.2em] shadow-[0_0_15px_rgba(197,160,89,0.5)] z-20">
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#c5a059] text-black text-[9px] font-black px-6 py-1 rounded-full uppercase tracking-[0.2em] z-20">
                   Más Elegido
                 </div>
               )}
 
               <div className={`mb-8 p-3 rounded-xl w-fit ${pkg.recommended ? 'bg-[#c5a059]/20' : 'bg-white/5'}`}>
-                <pkg.icon 
-                  size={24} 
-                  className={pkg.recommended ? "text-[#c5a059]" : "text-white/40"} 
-                />
+                <pkg.icon size={24} className={pkg.recommended ? "text-[#c5a059]" : "text-white/40"} />
               </div>
               
               <h3 className="text-xl font-bold text-white mb-8 tracking-tight uppercase">
@@ -171,7 +171,7 @@ export default function Packages() {
                   <span className="text-[8px] tracking-[0.4em] text-gray-600 uppercase mb-1 font-bold">Inversión Cultural</span>
                   <span className={`text-2xl font-black tracking-tighter italic bg-clip-text text-transparent bg-gradient-to-b ${
                     pkg.recommended 
-                    ? 'from-white via-[#c5a059] to-[#866d3c] drop-shadow-[0_0_10px_rgba(197,160,89,0.3)]' 
+                    ? 'from-white via-[#c5a059] to-[#866d3c]' 
                     : 'from-white via-gray-400 to-gray-600'
                   }`}>
                     {pkg.price}
@@ -180,71 +180,53 @@ export default function Packages() {
 
                 <button 
                   onClick={() => handleOpen(pkg.name)}
-                  className={`w-full py-4 text-[9px] uppercase tracking-[0.4em] font-black transition-all duration-500 rounded-lg shadow-sm active:scale-95 ${
+                  className={`w-full py-4 text-[9px] uppercase tracking-[0.4em] font-black transition-all duration-500 rounded-lg ${
                     pkg.recommended 
-                    ? 'bg-[#c5a059] text-black hover:bg-white hover:shadow-[0_0_25px_rgba(255,255,255,0.2)]' 
+                    ? 'bg-[#c5a059] text-black hover:bg-white' 
                     : 'bg-transparent border border-white/10 text-white hover:bg-white hover:text-black'
                   }`}
                 >
                   {pkg.recommended ? 'Reservar Experiencia' : 'Solicitar Info'}
                 </button>
               </div>
-            </div>
+            </motion.div>
           ))}
         </div>
       </div>
 
-      {/* MODAL POP-UP PREMIUM */}
+      {/* MODAL POP-UP (Se mantiene igual) */}
       {isOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/90 backdrop-blur-md">
           <div className="relative w-full max-w-md bg-[#0a0a0a] border border-white/10 p-10 rounded-3xl shadow-[0_0_50px_rgba(0,0,0,1)]">
-            <button 
-              onClick={() => setIsOpen(false)} 
-              className="absolute top-6 right-6 text-gray-500 hover:text-[#c5a059] transition-colors"
-            >
+            <button onClick={() => setIsOpen(false)} className="absolute top-6 right-6 text-gray-500 hover:text-[#c5a059] transition-colors">
               <X size={24}/>
             </button>
-
-            <div className="mb-8">
+            <div className="mb-8 text-center">
               <h3 className="text-2xl font-black text-white uppercase tracking-tighter mb-2">
                 Solicitar <span className="text-[#c5a059]">{selectedPkg}</span>
               </h3>
-              <div className="w-12 h-[2px] bg-[#c5a059] mb-4"></div>
               <p className="text-[9px] text-gray-400 uppercase tracking-[0.3em] font-bold">
-                Dejanos tus datos para coordinar la función
+                Dejanos tus datos para coordinar
               </p>
             </div>
-            
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-1">
-                <label className="text-[8px] uppercase tracking-widest text-white-600 ml-1">Nombre Completo</label>
-                <input required type="text" className="w-full bg-white/[0.03] border border-white/10 rounded-xl p-4 text-white text-xs uppercase tracking-widest focus:border-[#c5a059] focus:bg-white/[0.07] outline-none transition-all" onChange={(e) => setFormData({...formData, nombre: e.target.value})} />
-              </div>
-              
-              <div className="space-y-1">
-                <label className="text-[8px] uppercase tracking-widest text-white-600 ml-1">WhatsApp (con país)</label>
-                <PhoneInput
-                  international
-                  defaultCountry="MX"
-                  value={phone}
-                  onChange={setPhone}
-                  required
-                />
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-[8px] uppercase tracking-widest text-white-600 ml-1">Institución / Empresa</label>
-                <input required type="text" className="w-full bg-white/[0.03] border border-white/10 rounded-xl p-4 text-white text-xs uppercase tracking-widest focus:border-[#c5a059] focus:bg-white/[0.07] outline-none transition-all" onChange={(e) => setFormData({...formData, institucion: e.target.value})} />
+                <label className="text-[8px] uppercase tracking-widest text-gray-600 ml-1">Nombre Completo</label>
+                <input required type="text" className="w-full bg-white/[0.03] border border-white/10 rounded-xl p-4 text-white text-xs uppercase tracking-widest focus:border-[#c5a059] outline-none transition-all" onChange={(e) => setFormData({...formData, nombre: e.target.value})} />
               </div>
               <div className="space-y-1">
-                <label className="text-[8px] uppercase tracking-widest text-white-600 ml-1">Ciudad</label>
-                <input required type="text" className="w-full bg-white/[0.03] border border-white/10 rounded-xl p-4 text-white text-xs uppercase tracking-widest focus:border-[#c5a059] focus:bg-white/[0.07] outline-none transition-all" onChange={(e) => setFormData({...formData, ciudad: e.target.value})} />
+                <label className="text-[8px] uppercase tracking-widest text-gray-600 ml-1">WhatsApp (con país)</label>
+                <PhoneInput international defaultCountry="MX" countries={['AR', 'MX', 'ES', 'CO', 'CL', 'PE', 'UY', 'PY', 'BO', 'EC', 'VE', 'CU', 'DO', 'PR', 'GT', 'HN', 'SV', 'NI', 'CR', 'PA']} value={phone} onChange={setPhone} required className="premium-phone-input" />
               </div>
-
-              <button 
-                type="submit" 
-                className="w-full py-5 bg-[#c5a059] text-black font-black uppercase text-[10px] tracking-[0.4em] rounded-xl hover:bg-white hover:scale-[1.02] active:scale-95 transition-all mt-6 shadow-[0_10px_20px_rgba(197,160,89,0.2)]"
-              >
+              <div className="space-y-1">
+                <label className="text-[8px] uppercase tracking-widest text-gray-600 ml-1">Institución / Empresa</label>
+                <input required type="text" className="w-full bg-white/[0.03] border border-white/10 rounded-xl p-4 text-white text-xs uppercase tracking-widest focus:border-[#c5a059] outline-none transition-all" onChange={(e) => setFormData({...formData, institucion: e.target.value})} />
+              </div>
+              <div className="space-y-1">
+                <label className="text-[8px] uppercase tracking-widest text-gray-600 ml-1">Ciudad</label>
+                <input required type="text" className="w-full bg-white/[0.03] border border-white/10 rounded-xl p-4 text-white text-xs uppercase tracking-widest focus:border-[#c5a059] outline-none transition-all" onChange={(e) => setFormData({...formData, ciudad: e.target.value})} />
+              </div>
+              <button type="submit" className="w-full py-5 bg-[#c5a059] text-black font-black uppercase text-[10px] tracking-[0.4em] rounded-xl hover:bg-white transition-all mt-6 shadow-[0_10px_20px_rgba(197,160,89,0.2)]">
                 Enviar vía WhatsApp
               </button>
             </form>
