@@ -34,14 +34,14 @@ export default function Footer() {
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-16 items-start text-center md:text-left">
           
-          {/* Columna 1: El Logo reemplaza a las letras */}
+          {/* Columna 1: Manifiesto con Logo */}
           <div className="space-y-4">
             <div className="relative w-32 h-20 mx-auto md:mx-0">
               <Image 
                 src="/ImproflowLogo.png" 
                 alt="Improflow Logo"
                 fill
-                className="object-contain object-left"
+                className="object-contain md:object-left"
               />
             </div>
             <p className="text-gray-400 text-[11px] leading-relaxed tracking-widest uppercase font-light max-w-xs mx-auto md:mx-0">
@@ -49,10 +49,10 @@ export default function Footer() {
             </p>
           </div>
 
-          {/* Columna 2: Redes Sociales (Sin cambios) */}
+          {/* Columna 2: Redes Sociales */}
           <div className="flex flex-col items-center space-y-6">
             <span className="text-[11px] tracking-[0.5em] text-white/60 uppercase font-bold">Seguinos</span>
-            <div className="grid grid-cols-2 gap-x-12 gap-y-6">
+            <div className="grid grid-cols-2 gap-x-12 gap-y-6 text-left">
               <a href="https://facebook.com/Improflow" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-xs uppercase tracking-widest text-white/80 hover:text-[#c5a059] transition-all group">
                 <FaFacebookF size={16} className="group-hover:scale-125 transition-transform" /> 
                 <span className="font-medium">Facebook</span>
@@ -72,8 +72,8 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Columna 3: Relojes (Sin cambios) */}
-          <div className="md:text-right space-y-4">
+          {/* Columna 3: Relojes - CENTRADO EN CELU CORREGIDO */}
+          <div className="text-center md:text-right space-y-4">
             <span className="text-[14px] tracking-[0.5em] text-white/60 uppercase block mb-4 font-bold">Local Time</span>
             <div className="text-sm tracking-[0.2em] text-gray-400 uppercase font-mono space-y-2">
               <p className="text-[12px]">Tu Hora <span className="text-white ml-2">{getLocalTime()} HS</span></p>
@@ -83,7 +83,7 @@ export default function Footer() {
           </div>
         </div>
 
-        {/* Firma con Logo FocusFV (Sin cambios) */}
+        {/* Firma con Logo FocusFV */}
         <div className="pt-10 border-t border-white/10 flex flex-col items-center">
           <div className="flex flex-col items-center group mb-8">
             <span className="text-[9px] tracking-[1em] text-gray-500 uppercase mb-6">Produced by</span>

@@ -11,7 +11,6 @@ export default function Creators() {
       bio: "Desde El Jagüel para el mundo. Especialista en teatro de improvisación con años de trayectoria transformando el escenario en puro juego.",
       image: "https://i.imgur.com/HyC1sj7.png", 
       ig: "https://www.instagram.com/jonatanalesisfleitas/", 
-      in: "https://www.linkedin.com/in/alesis-fleitas-0983a4258/"
     },
     {
       name: "Eduardo Hernández",
@@ -19,7 +18,6 @@ export default function Creators() {
       bio: "La mente detrás de la fusión estratégica. Experto en coordinar la creatividad multicultural para que el impacto sea real.",
       image: "https://i.imgur.com/WDS8qTX.png", 
       ig: "https://www.instagram.com/laloimpro/", 
-      in: "https://linkedin.com/in/lalo_tu_usuario" 
     },
     {
       name: "Fede Villalba",
