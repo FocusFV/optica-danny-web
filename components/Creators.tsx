@@ -6,7 +6,7 @@ export default function Creators() {
       name: "Alesis Fleitas",
       role: "Actor Profesional & Co-Fundador",
       bio: "Desde El Jagüel para el mundo. Especialista en teatro de improvisación con años de trayectoria transformando el escenario en puro juego.",
-      image: "https://i.imgur.com/aQpfbal.jpeg", // Dejá el link que ya tenías puesto
+      image: "https://i.imgur.com/HyC1sj7.png", // Dejá el link que ya tenías puesto
       ig: "https://www.instagram.com/jonatanalesisfleitas/", // <-- PEGA EL LINK DE IG ACÁ
       in: "https://www.linkedin.com/in/alesis-fleitas-0983a4258/" // <-- PEGA EL LINK DE LINKEDIN ACÁ
     },
@@ -14,7 +14,7 @@ export default function Creators() {
       name: "Eduardo Hernández",
       role: "Estrategia & Dirección",
       bio: "La mente detrás de la fusión estratégica. Experto en coordinar la creatividad multicultural para que el impacto sea real.",
-      image: "https://i.imgur.com/P1UgqX7.jpeg", // Dejá el link que ya tenías puesto
+      image: "https://i.imgur.com/k3MuwtA.jpeg", // Dejá el link que ya tenías puesto
       ig: "https://www.instagram.com/laloimpro/", // <-- PEGA EL LINK DE IG ACÁ
       in: "https://linkedin.com/in/lalo_tu_usuario" // <-- PEGA EL LINK DE LINKEDIN ACÁ
     },
