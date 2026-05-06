@@ -14,12 +14,10 @@ export default function Footer() {
     return () => clearInterval(timer);
   }, []);
 
-  // Función para la hora de quien mira la web (basada en su sistema)
   const getLocalTime = () => {
     return time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
   };
 
-  // Función genérica para calcular horas fijas (Mérida -6, Argentina -3)
   const formatTime = (offset: number) => {
     const d = new Date(time.getTime() + (time.getTimezoneOffset() * 60000) + (offset * 3600000));
     return d.getHours().toString().padStart(2, '0') + ":" + 
@@ -33,19 +31,25 @@ export default function Footer() {
       <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#c5a059]/50 to-transparent"></div>
       
       <div className="max-w-7xl mx-auto px-6 relative z-10">
+        
         <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-16 items-start text-center md:text-left">
           
-          {/* Columna 1: Manifiesto */}
+          {/* Columna 1: El Logo reemplaza a las letras */}
           <div className="space-y-4">
-            <h2 className="text-xl font-black tracking-widest text-white uppercase">
-              IMPRO<span className="text-[#c5a059]">FLOW</span>
-            </h2>
+            <div className="relative w-32 h-20 mx-auto md:mx-0">
+              <Image 
+                src="/ImproflowLogo.png" 
+                alt="Improflow Logo"
+                fill
+                className="object-contain object-left"
+              />
+            </div>
             <p className="text-gray-400 text-[11px] leading-relaxed tracking-widest uppercase font-light max-w-xs mx-auto md:mx-0">
               Fusión teatral de Argentina y México. Elevando el arte de la improvisación a un estándar cinematográfico.
             </p>
           </div>
 
-          {/* Columna 2: Redes Sociales */}
+          {/* Columna 2: Redes Sociales (Sin cambios) */}
           <div className="flex flex-col items-center space-y-6">
             <span className="text-[11px] tracking-[0.5em] text-white/60 uppercase font-bold">Seguinos</span>
             <div className="grid grid-cols-2 gap-x-12 gap-y-6">
@@ -68,7 +72,7 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Columna 3: Relojes (Local, Mérida y Argentina) */}
+          {/* Columna 3: Relojes (Sin cambios) */}
           <div className="md:text-right space-y-4">
             <span className="text-[14px] tracking-[0.5em] text-white/60 uppercase block mb-4 font-bold">Local Time</span>
             <div className="text-sm tracking-[0.2em] text-gray-400 uppercase font-mono space-y-2">
@@ -79,7 +83,7 @@ export default function Footer() {
           </div>
         </div>
 
-        {/* Firma con Logo FocusFV */}
+        {/* Firma con Logo FocusFV (Sin cambios) */}
         <div className="pt-10 border-t border-white/10 flex flex-col items-center">
           <div className="flex flex-col items-center group mb-8">
             <span className="text-[9px] tracking-[1em] text-gray-500 uppercase mb-6">Produced by</span>
@@ -98,7 +102,7 @@ export default function Footer() {
             <div className="flex flex-wrap justify-center gap-3 text-gray-600 text-[9px]">
               <p>Mérida</p><span>•</span>
               <p>Rosario</p><span>•</span>
-              <p>Buenos Aires</p><span>•</span>
+              <p>Buenos Aires</p><span></span>
             </div>
           </div>
         </div>

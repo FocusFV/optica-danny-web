@@ -17,7 +17,7 @@ export default function Creators() {
       name: "Eduardo Hernández",
       role: "Estrategia & Dirección",
       bio: "La mente detrás de la fusión estratégica. Experto en coordinar la creatividad multicultural para que el impacto sea real.",
-      image: "https://i.imgur.com/k3MuwtA.jpeg", 
+      image: "https://i.imgur.com/WDS8qTX.png", 
       ig: "https://www.instagram.com/laloimpro/", 
       in: "https://linkedin.com/in/lalo_tu_usuario" 
     },

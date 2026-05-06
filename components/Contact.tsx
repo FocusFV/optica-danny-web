@@ -22,7 +22,7 @@ export default function Contact() {
         <form className="space-y-12">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
             <div className="group">
-              <label className="block text-[9px] uppercase tracking-[0.4em] text-gray-500 mb-2 group-focus-within:text-[#c5a059] transition-colors">Nombre completo</label>
+              <label className="block text-[9px] uppercase tracking-[0.4em] text-white-500 mb-2 group-focus-within:text-[#c5a059] transition-colors">Nombre completo</label>
               <input 
                 type="text" 
                 placeholder="ESCRIBÍ TU NOMBRE"
@@ -30,7 +30,7 @@ export default function Contact() {
               />
             </div>
             <div className="group">
-              <label className="block text-[9px] uppercase tracking-[0.4em] text-gray-500 mb-2 group-focus-within:text-[#c5a059] transition-colors">Email de contacto</label>
+              <label className="block text-[9px] uppercase tracking-[0.4em] text-white-500 mb-2 group-focus-within:text-[#c5a059] transition-colors">Email de contacto</label>
               <input 
                 type="email" 
                 placeholder="TU@EMAIL.COM"
@@ -40,7 +40,7 @@ export default function Contact() {
           </div>
 
           <div className="group">
-            <label className="block text-[9px] uppercase tracking-[0.4em] text-gray-500 mb-2 group-focus-within:text-[#c5a059] transition-colors">Tu propuesta o consulta</label>
+            <label className="block text-[9px] uppercase tracking-[0.4em] text-white-500 mb-2 group-focus-within:text-[#c5a059] transition-colors">Tu propuesta o consulta</label>
             <textarea 
               rows={3}
               placeholder="CONTANOS SOBRE TU EVENTO O ESCENARIO..."
