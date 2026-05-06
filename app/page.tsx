@@ -57,8 +57,8 @@ export default function Home() {
      <div className="max-w-7xl mx-auto px-6 space-y-40 pb-40 pt-20">
           <FadeIn><Creators /></FadeIn> 
           <FadeIn><Gallery /></FadeIn>
+          <FadeIn><Shows /></FadeIn>
           <FadeIn><Contact /></FadeIn> {/* <-- ACÁ CLAVAMOS EL FORM */}
-          {/* <FadeIn><Shows /></FadeIn> */}
         </div>
 
         {/* Footer Minimalista de Alta Gama importado como componente */}
