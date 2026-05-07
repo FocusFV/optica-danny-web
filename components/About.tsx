@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { createPortal } from 'react-dom'; // <-- IMPORT CLAVE PARA ESCAPAR DEL FADE-IN
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Users, Target, Zap, ChevronDown, ChevronUp, X, Info, Sparkles } from 'lucide-react';
 
@@ -49,7 +49,6 @@ const StatCard = ({ children, delay = 0 }: { children: React.ReactNode, delay?: 
 export default function About() {
   const [selectedVersion, setSelectedVersion] = useState<null | 'kids' | 'teen'>(null);
 
-  // Efecto inteligente: Bloquea el scroll SOLO si estamos en PC (Modal activo)
   useEffect(() => {
     const handleScrollLock = () => {
       if (selectedVersion && window.innerWidth >= 768) {
@@ -59,7 +58,7 @@ export default function About() {
       }
     };
 
-    handleScrollLock(); // Ejecutar al cambiar el estado
+    handleScrollLock();
     window.addEventListener('resize', handleScrollLock); 
     
     return () => {
@@ -70,6 +69,15 @@ export default function About() {
 
   return (
     <section id="about" className="py-20 md:py-32 relative">
+      {/* FIX CURSOR: Prioridad máxima para el cursor custom */}
+      <style jsx global>{`
+        #custom-cursor, 
+        .custom-cursor, 
+        [class*="cursor"] { 
+          z-index: 9999999 !important; 
+        }
+      `}</style>
+
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
         
         {/* Columna Izquierda */}
@@ -134,7 +142,6 @@ export default function About() {
             </StatCard>
           </div>
 
-          {/* ZONA DE VERSIONES */}
           <div className="pt-10 border-t border-white/5">
             <p className="text-gray-500 text-[10px] uppercase tracking-[0.3em] mb-6 font-bold">Detalles de las versiones:</p>
             
@@ -166,7 +173,7 @@ export default function About() {
               </button>
             </div>
 
-            {/* 1. ACORDEÓN SOLO PARA MOBILE */}
+            {/* ACORDEÓN MOBILE */}
             <div className="block md:hidden">
               <AnimatePresence mode="wait">
                 {selectedVersion && (
@@ -175,7 +182,6 @@ export default function About() {
                     initial={{ height: 0, opacity: 0 }}
                     animate={{ height: "auto", opacity: 1 }}
                     exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.4, ease: "easeInOut" }}
                     className="overflow-hidden"
                   >
                     <div className="bg-[#0a0a0a] border border-[#c5a059]/30 rounded-[2rem] p-6 shadow-lg">
@@ -209,27 +215,24 @@ export default function About() {
                 )}
               </AnimatePresence>
             </div>
-
           </div>
         </div>
       </div>
 
-      {/* 2. MODAL PARA PC CON PORTAL (Rompe el límite del FadeIn) */}
+      {/* MODAL PC CON PORTAL (VERSIÓN COMPLETA) */}
       {typeof document !== 'undefined' && createPortal(
         <AnimatePresence>
           {selectedVersion && (
             <div className="hidden md:flex fixed inset-0 z-[99999] items-center justify-center pointer-events-auto">
               
-              {/* Overlay */}
               <motion.div 
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 onClick={() => setSelectedVersion(null)}
-                className="absolute inset-0 bg-black/80 backdrop-blur-xl cursor-pointer"
+                className="absolute inset-0 bg-black/80 backdrop-blur-xl"
               />
               
-              {/* Tarjeta del Modal */}
               <motion.div 
                 initial={{ opacity: 0, scale: 0.9, y: 40 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -255,14 +258,14 @@ export default function About() {
                   </button>
                 </div>
 
-                {/* Cuerpo con scroll propio */}
+                {/* Cuerpo con scroll propio y todos los textos */}
                 <div className="p-8 overflow-y-auto custom-scrollbar flex-1 bg-[#0a0a0a]">
                   <p className="text-[#c5a059] italic text-base mb-6">{versionDetails[selectedVersion].subtitle}</p>
                   <p className="text-gray-400 text-lg leading-relaxed font-light mb-8">
                     {versionDetails[selectedVersion].description}
                   </p>
                   <div className="space-y-4">
-                    <p className="text-white text-[11px] uppercase tracking-[0.3em] font-bold opacity-50">Ejes fundamentales:</p>
+                    <p className="text-white text-[11px] uppercase tracking-[0.3em] font-bold opacity-50 mb-4">Ejes fundamentales:</p>
                     <ul className="space-y-4">
                       {versionDetails[selectedVersion].points.map((p, i) => (
                         <li key={i} className="flex items-start gap-4 text-sm text-gray-300 uppercase tracking-widest leading-relaxed">
