@@ -34,20 +34,48 @@ export default function Navbar() {
     >
       <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
         
-        {/* LOGO DE IMPROFLOW (Izquierda) */}
+        {/* LOGO LIMPIO CON RESPIRACIÓN (Izquierda) */}
         <motion.div 
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           className="flex items-center flex-1"
         >
-          <a href="#">
-            <img 
-              src="/ImproflowLogo.png" // Asegurate de que el nombre coincida con el archivo en /public
-              alt="Improflow Logo"
-              className={`transition-all duration-500 object-contain ${
-                isScrolled ? 'h-12' : 'h-20' // Se achica un poco al scrollear para no molestar
-              }`}
-            />
+          <a href="#" className="relative">
+            <motion.div
+              whileHover="hover"
+              initial="initial"
+              className="relative"
+              // Animación de respiración sutil
+              animate={{
+                scale: [1, 1.03, 1],
+              }}
+              transition={{
+                duration: 4,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
+            >
+              {/* Logo Principal - Sin sombras ni flares */}
+              <motion.img 
+                variants={{
+                  hover: { 
+                    filter: "brightness(1.3) contrast(1.1)",
+                    scale: 1.05,
+                    // Pequeño glitch de posición solo en hover
+                    x: [-1, 1, -1, 0],
+                    transition: { 
+                      x: { duration: 0.2, repeat: Infinity },
+                      scale: { duration: 0.3 }
+                    }
+                  }
+                }}
+                src="/ImproflowLogo.png"
+                alt="Improflow Logo"
+                className={`transition-all duration-500 object-contain relative z-10 ${
+                  isScrolled ? 'h-12' : 'h-20'
+                }`}
+              />
+            </motion.div>
           </a>
         </motion.div>
 
