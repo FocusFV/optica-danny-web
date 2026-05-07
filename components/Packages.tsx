@@ -223,7 +223,7 @@ export default function Packages() {
                 <input required type="text" className="w-full bg-white/[0.03] border border-white/10 rounded-xl p-4 text-white text-xs uppercase tracking-widest focus:border-[#c5a059] outline-none transition-all" onChange={(e) => setFormData({...formData, institucion: e.target.value})} />
               </div>
               <div className="space-y-1">
-                <label className="text-[8px] uppercase tracking-widest text-gray-600 ml-1">Ciudad</label>
+                <label className="text-[8px] uppercase tracking-widest text-white-600 ml-1">Ciudad</label>
                 <input required type="text" className="w-full bg-white/[0.03] border border-white/10 rounded-xl p-4 text-white text-xs uppercase tracking-widest focus:border-[#c5a059] outline-none transition-all" onChange={(e) => setFormData({...formData, ciudad: e.target.value})} />
               </div>
               <button type="submit" className="w-full py-5 bg-[#c5a059] text-black font-black uppercase text-[10px] tracking-[0.4em] rounded-xl hover:bg-white transition-all mt-6 shadow-[0_10px_20px_rgba(197,160,89,0.2)]">

@@ -41,6 +41,7 @@ export default function Footer() {
                 src="/ImproflowLogo.png" 
                 alt="Improflow Logo"
                 fill
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                 className="object-contain md:object-left"
               />
             </div>
@@ -92,6 +93,7 @@ export default function Footer() {
                 src="/FocusFVLogo.png" 
                 alt="FocusFV Logo"
                 fill
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                 className="object-contain drop-shadow-[0_0_15px_rgba(197,160,89,0.3)]"
               />
             </div>

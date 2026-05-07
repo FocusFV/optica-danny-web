@@ -14,50 +14,45 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-[#050505] text-white relative selection:bg-[#c5a059] selection:text-black">
       
-      {/* El cursor tiene que estar presente en toda la página */}
       <CustomCursor />
 
-      {/* Efectos de fondo Premium */}
       <div className="fixed inset-0 z-0 pointer-events-none bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#1a1a1a] via-[#050505] to-[#050505]"></div>
       <div className="fixed inset-0 z-0 opacity-[0.02] pointer-events-none" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'1\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")' }}></div>
 
       <div className="relative z-10">
-        {/* Navbar sticky por encima de todo */}
         <Navbar />
-
-        {/* Hero Section Cinematográfica */}
+        
         <Hero />
 
-        {/* Contenedor de Secciones principales */}
-        <div className="max-w-7xl mx-auto px-6 space-y-40 pb-40">
+        {/* Primera sección (Nosotros) */}
+        <div className="max-w-7xl mx-auto px-6 pt-40 pb-20">
           <FadeIn>
-            <About />
+            <section id="about"><About /></section>
           </FadeIn>
         </div>
 
-        {/* Cinta Infinita (Marquee) */}
+        {/* Marquesina separando Nosotros de las Mentes */}
         <Marquee />
 
-        {/* Resto del contenido con FadeIn para ese toque suave */}
+        {/* Resto de las secciones */}
         <div className="max-w-7xl mx-auto px-6 space-y-40 pb-40 pt-20">
-          <section id="creators">
-            <FadeIn><Creators /></FadeIn>
-          </section>
+          <FadeIn>
+            <section id="creators"><Creators /></section>
+          </FadeIn>
           
-          <section id="gallery">
-            <FadeIn><Gallery /></FadeIn>
-          </section>
+          <FadeIn>
+            <section id="gallery"><Gallery /></section>
+          </FadeIn>
           
-          <section id="paquetes">
-            <FadeIn><Packages /></FadeIn>
-          </section>
+          <FadeIn>
+            <section id="paquetes"><Packages /></section>
+          </FadeIn>
           
-          <section id="contact">
-            <FadeIn><Contact /></FadeIn>
-          </section>
+          <FadeIn>
+            <section id="contacto"><Contact /></section>
+          </FadeIn>
         </div>
 
-        {/* Footer con el logo integrado en la columna izquierda */}
         <Footer />
       </div>
     </main>
