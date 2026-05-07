@@ -24,7 +24,6 @@ export default function Creators() {
       role: "Producción Visual & Operativa",
       bio: "El ojo detrás de FocusFV. Responsable de la estructura, la técnica y de que cada detalle visual de Improflow sea impecable.",
       image: "https://i.imgur.com/T7gyife.png", 
-      ig: "https://www.instagram.com/villalba.fede/", 
       in: "https://www.linkedin.com/in/federicovillalba/" 
     }
   ];
@@ -42,14 +41,12 @@ export default function Creators() {
           <div className="w-12 h-[2px] bg-[#c5a059] mt-6"></div>
         </div>
 
-        {/* Grilla de Creadores con Revelado Cinematográfico */}
+        {/* Grilla de Creadores */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-8">
           {team.map((member, i) => (
             <div key={i} className="group relative">
               
-              {/* Contenedor de Imagen con Framer Motion */}
               <motion.div 
-                // Efecto de iluminación al scrollear
                 initial={{ 
                   filter: 'grayscale(100%) brightness(0.3)', 
                   scale: 0.95 
@@ -58,14 +55,8 @@ export default function Creators() {
                   filter: 'grayscale(0%) brightness(1)', 
                   scale: 1 
                 }}
-                viewport={{ 
-                  once: false, 
-                  amount: 0.5 // Se activa cuando el miembro está bien centrado en el celu
-                }}
-                transition={{ 
-                  duration: 1, 
-                  ease: [0.22, 1, 0.36, 1] 
-                }}
+                viewport={{ once: false, amount: 0.5 }}
+                transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
                 className="relative aspect-[3/4] overflow-hidden bg-gray-900 mb-8 border border-white/5 rounded-2xl shadow-2xl"
               >
                 <img 
@@ -73,12 +64,9 @@ export default function Creators() {
                   alt={member.name}
                   className="w-full h-full object-cover transition-transform duration-700 ease-in-out md:group-hover:scale-110"
                 />
-                
-                {/* Overlay degradado premium */}
                 <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-transparent to-transparent opacity-80 group-hover:opacity-40 transition-opacity duration-500"></div>
               </motion.div>
 
-              {/* Info del Miembro con pequeñas animaciones de texto */}
               <div className="space-y-4">
                 <motion.div
                   initial={{ opacity: 0.5, x: -10 }}
@@ -98,30 +86,32 @@ export default function Creators() {
                   {member.bio}
                 </p>
                 
-                {/* Redes Sociales con íconos premium */}
                 <div className="flex gap-6 pt-4 items-center">
                    <div className="w-10 h-[1px] bg-gradient-to-r from-[#c5a059] to-transparent"></div>
                    
-                   {/* Instagram */}
-                   <a href={member.ig} target="_blank" rel="noopener noreferrer" className="text-white/40 hover:text-[#c5a059] hover:scale-125 transition-all duration-300" aria-label={`Instagram de ${member.name}`}>
-                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                       <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
-                       <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
-                       <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
-                     </svg>
-                   </a>
+                   {/* Instagram Condicional */}
+                   {member.ig && (
+                     <a href={member.ig} target="_blank" rel="noopener noreferrer" className="text-white/40 hover:text-[#c5a059] hover:scale-125 transition-all duration-300" aria-label={`Instagram de ${member.name}`}>
+                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                         <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                         <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                         <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+                       </svg>
+                     </a>
+                   )}
                    
-                   {/* LinkedIn */}
-                   <a href={member.in} target="_blank" rel="noopener noreferrer" className="text-white/40 hover:text-[#c5a059] hover:scale-125 transition-all duration-300" aria-label={`LinkedIn de ${member.name}`}>
-                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                       <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path>
-                       <rect x="2" y="9" width="4" height="12"></rect>
-                       <circle cx="4" cy="4" r="2"></circle>
-                     </svg>
-                   </a>
+                   {/* LinkedIn Condicional */}
+                   {member.in && (
+                     <a href={member.in} target="_blank" rel="noopener noreferrer" className="text-white/40 hover:text-[#c5a059] hover:scale-125 transition-all duration-300" aria-label={`LinkedIn de ${member.name}`}>
+                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                         <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path>
+                         <rect x="2" y="9" width="4" height="12"></rect>
+                         <circle cx="4" cy="4" r="2"></circle>
+                       </svg>
+                     </a>
+                   )}
                 </div>
               </div>
-              
             </div>
           ))}
         </div>
