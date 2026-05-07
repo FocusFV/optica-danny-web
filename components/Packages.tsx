@@ -211,15 +211,15 @@ export default function Packages() {
             </div>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-1">
-                <label className="text-[8px] uppercase tracking-widest text-gray-600 ml-1">Nombre Completo</label>
+                <label className="text-[8px] uppercase tracking-widest text-white-600 ml-1">Nombre Completo</label>
                 <input required type="text" className="w-full bg-white/[0.03] border border-white/10 rounded-xl p-4 text-white text-xs uppercase tracking-widest focus:border-[#c5a059] outline-none transition-all" onChange={(e) => setFormData({...formData, nombre: e.target.value})} />
               </div>
               <div className="space-y-1">
-                <label className="text-[8px] uppercase tracking-widest text-gray-600 ml-1">WhatsApp (con país)</label>
+                <label className="text-[8px] uppercase tracking-widest text-white-600 ml-1">WhatsApp (con país)</label>
                 <PhoneInput international defaultCountry="MX" countries={['AR', 'MX', 'ES', 'CO', 'CL', 'PE', 'UY', 'PY', 'BO', 'EC', 'VE', 'CU', 'DO', 'PR', 'GT', 'HN', 'SV', 'NI', 'CR', 'PA']} value={phone} onChange={setPhone} required className="premium-phone-input" />
               </div>
               <div className="space-y-1">
-                <label className="text-[8px] uppercase tracking-widest text-gray-600 ml-1">Institución / Empresa</label>
+                <label className="text-[8px] uppercase tracking-widest text-white-600 ml-1">Institución / Empresa</label>
                 <input required type="text" className="w-full bg-white/[0.03] border border-white/10 rounded-xl p-4 text-white text-xs uppercase tracking-widest focus:border-[#c5a059] outline-none transition-all" onChange={(e) => setFormData({...formData, institucion: e.target.value})} />
               </div>
               <div className="space-y-1">
