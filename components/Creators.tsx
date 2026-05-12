@@ -14,7 +14,7 @@ export default function Creators() {
       role: "Especialista en Optometría y Salud Visual",
       bio: "Experta en diagnóstico refractivo avanzado y adaptación de soluciones ópticas de alta precisión.",
       fullBio: "Con una sólida trayectoria en el cuidado de la visión, Diana combina el rigor clínico con una sensibilidad estética única. Su especialidad radica en la detección precisa de anomalías refractivas y la prescripción personalizada, asegurando que cada armazón no solo sea un accesorio, sino una herramienta de bienestar. Su enfoque se centra en la salud ocular integral, desde la evaluación optométrica detallada hasta la adaptación de lentes progresivos de última generación en el corazón de Mérida.",
-      image: "https://i.imgur.com/OzSxH8T.png", // Después ponele una foto de ella bien pro
+      image: "https://i.imgur.com/OzSxH8T.png", // Después ponele una foto de ella bien profff
       highlights: ["Examen de la Vista Computarizado", "Adaptación de Lentes de Contacto", "Especialista en Salud Ocular"]
     }
   ];

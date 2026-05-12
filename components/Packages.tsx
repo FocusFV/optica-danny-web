@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Check, Zap, Eye, shadow, Sparkles, X, Smartphone } from 'lucide-react';
+import { Check, Zap, Eye, Sparkles, X } from 'lucide-react';
 import 'react-phone-number-input/style.css';
 import PhoneInput from 'react-phone-number-input';
 
