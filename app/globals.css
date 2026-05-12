@@ -6,37 +6,67 @@
   }
   
   body {
-    background-color: #050505 !important;
-    color: #ffffff !important;
+    /* Azul petróleo profundo basado en el logo */
+    background-color: #001529 !important; 
+    /* Gris muy claro para que no canse la vista como el blanco puro */
+    color: #e6e6e6 !important; 
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
 
-  /* Selección de texto premium */
+  /* Selección de texto con el dorado de Danny */
   ::selection {
     background-color: #c5a059;
     color: #000000;
   }
 
-  /* Barra de scroll personalizada */
+  /* Barra de scroll personalizada y elegante */
   ::-webkit-scrollbar {
     width: 8px;
   }
   ::-webkit-scrollbar-track {
-    background: #050505;
+    background: #001529;
   }
   ::-webkit-scrollbar-thumb {
-    background: #1f2937;
+    background: #1e293b;
     border-radius: 4px;
   }
   ::-webkit-scrollbar-thumb:hover {
     background: #c5a059;
   }
 }
+
+/* --- UTILIDADES PERSONALIZADAS --- */
+
+/* Gradiente dorado para textos (como el título principal) */
+.texto-gradient-gold {
+  background: linear-gradient(to right, #c5a059, #f9e3b4, #c5a059);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: bold;
+}
+
+/* Efecto de resplandor para botones o iconos */
+.glow-premium {
+  filter: drop-shadow(0 0 10px rgba(197, 160, 89, 0.3));
+  transition: all 0.3s ease;
+}
+
+.glow-premium:hover {
+  filter: drop-shadow(0 0 20px rgba(197, 160, 89, 0.6));
+}
+
+/* Los "firuletes": Sombras difusas para fondos de secciones */
+.bg-onda-dorada {
+  background: radial-gradient(circle at 50% -20%, rgba(197, 160, 89, 0.15) 0%, transparent 50%);
+}
+
+/* Animación de la cinta (por si la seguís usando para marcas de lentes) */
 @keyframes correr {
   0% { transform: translateX(0); }
   100% { transform: translateX(-50%); }
 }
+
 .cinta-infinita {
-  animation: correr 20s linear infinite !important;
+  animation: correr 25s linear infinite !important;
 }

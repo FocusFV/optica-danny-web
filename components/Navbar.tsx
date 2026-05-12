@@ -18,87 +18,58 @@ export default function Navbar() {
 
   const navLinks = [
     { name: 'Inicio', href: '#' },
-    { name: 'Nosotros', href: '#about' },
-    { name: 'Equipo', href: '#creators' },
-    { name: 'Galería', href: '#gallery' },
-    { name: 'Paquetes', href: '#paquetes' },
+    { name: 'Servicios', href: '#servicios' },
+    { name: 'Marcos', href: '#marcos' },
+    { name: 'Ubicación', href: '#ubicacion' },
   ];
 
   return (
     <nav 
       className={`fixed top-0 left-0 w-full z-[100] transition-all duration-500 ${
         isScrolled 
-          ? 'py-2 bg-black/80 backdrop-blur-xl border-b border-white/5' 
+          ? 'py-2 bg-[#001529]/90 backdrop-blur-xl border-b border-[#c5a059]/20' 
           : 'py-6 bg-transparent'
       }`}
     >
       <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
         
-        {/* LOGO LIMPIO CON RESPIRACIÓN (Izquierda) */}
+        {/* LOGO ÓPTICA DANNY */}
         <motion.div 
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           className="flex items-center flex-1"
         >
-          <a href="#" className="relative">
-            <motion.div
-              whileHover="hover"
-              initial="initial"
-              className="relative"
-              // Animación de respiración sutil
-              animate={{
-                scale: [1, 1.03, 1],
-              }}
-              transition={{
-                duration: 4,
-                repeat: Infinity,
-                ease: "easeInOut"
-              }}
-            >
-              {/* Logo Principal - Sin sombras ni flares */}
-              <motion.img 
-                variants={{
-                  hover: { 
-                    filter: "brightness(1.3) contrast(1.1)",
-                    scale: 1.05,
-                    // Pequeño glitch de posición solo en hover
-                    x: [-1, 1, -1, 0],
-                    transition: { 
-                      x: { duration: 0.2, repeat: Infinity },
-                      scale: { duration: 0.3 }
-                    }
-                  }
-                }}
-                src="/ImproflowLogo.png"
-                alt="Improflow Logo"
-                className={`transition-all duration-500 object-contain relative z-10 ${
-                  isScrolled ? 'h-12' : 'h-20'
-                }`}
-              />
-            </motion.div>
+          <a href="#" className="relative group">
+            <motion.img 
+              src="/logodannyblanco.png"
+              alt="Óptica Danny Logo"
+              className={`transition-all duration-500 object-contain relative z-10 glow-premium ${
+                isScrolled ? 'h-12' : 'h-20'
+              }`}
+            />
           </a>
         </motion.div>
 
-        {/* LINKS CENTRADOS (Desktop) */}
+        {/* LINKS (Desktop) */}
         <div className="hidden md:flex items-center justify-center gap-8 flex-[2]">
           {navLinks.map((link) => (
             <a 
               key={link.name}
               href={link.href}
-              className="text-[10px] uppercase tracking-[0.4em] text-gray-400 hover:text-[#c5a059] transition-colors duration-300 font-medium whitespace-nowrap"
+              className="text-[10px] uppercase tracking-[0.4em] text-gray-300 hover:text-[#c5a059] transition-colors duration-300 font-medium whitespace-nowrap"
             >
               {link.name}
             </a>
           ))}
         </div>
 
-        {/* BOTÓN (Derecha) */}
+        {/* BOTÓN TURNOS (Derecha) */}
         <div className="flex justify-end items-center flex-1">
           <a 
             href="#contact"
-            className="hidden md:block px-6 py-2 border border-[#c5a059]/50 text-[#c5a059] text-[10px] uppercase tracking-[0.3em] font-black rounded-full hover:bg-[#c5a059] hover:text-black transition-all duration-500"
+            className="hidden md:block px-6 py-2 border border-[#c5a059] text-[#c5a059] text-[10px] uppercase tracking-[0.3em] font-black rounded-full hover:bg-[#c5a059] hover:text-black transition-all duration-500 shadow-[0_0_15px_rgba(197,160,89,0.2)]"
           >
-            Contacto
+            Sacar Turno
           </a>
 
           <button 
@@ -117,7 +88,7 @@ export default function Navbar() {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="absolute top-full left-0 w-full bg-black/95 backdrop-blur-2xl border-b border-white/10 py-10 px-6 md:hidden"
+            className="absolute top-full left-0 w-full bg-[#001529]/95 backdrop-blur-2xl border-b border-[#c5a059]/20 py-10 px-6 md:hidden"
           >
             <div className="flex flex-col gap-8 items-center text-center">
               {navLinks.map((link) => (

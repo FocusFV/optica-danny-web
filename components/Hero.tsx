@@ -7,16 +7,12 @@ export default function Hero() {
   const [isMounted, setIsMounted] = useState(false);
   const { scrollY } = useScroll();
   
-  // TODOS LOS HOOKS ACÁ ARRIBA (Nada adentro del return)
-  const scaleScroll = useTransform(scrollY, [0, 700], [1, 15]);
+  const scaleScroll = useTransform(scrollY, [0, 700], [1, 12]);
   const opacity = useTransform(scrollY, [0, 500], [1, 0]);
-  const videoOpacity = useTransform(scrollY, [0, 600], [0.3, 1]);
   
-  // ACÁ ESTABA EL ERROR: El filtro era un hook inline. Lo declaramos acá arriba.
   const filterStyle = useTransform(scrollY, (value) => {
-    const currentGray = value < 100 ? 100 : Math.max(0, 100 - (value - 100) / 4);
     const currentBlur = Math.max(0, 4 - value / 100);
-    return `grayscale(${currentGray}%) blur(${currentBlur}px) saturate(1.1)`;
+    return `blur(${currentBlur}px)`;
   });
 
   useEffect(() => {
@@ -24,68 +20,57 @@ export default function Hero() {
   }, []);
 
   return (
-    <section className="relative h-[190vh] bg-[#050505]">
-      {/* Si está montado muestra la animación, sino un div negro para el SSR */}
+    <section className="relative h-[190vh] bg-[#001529]">
       {isMounted ? (
-        <div className="sticky top-0 h-screen w-full overflow-hidden">
-          <motion.div 
-            style={{ 
-              opacity: videoOpacity, 
-              filter: filterStyle // Pasamos la variable, sin usar hook adentro
-            }}
-            className="absolute inset-0 z-0"
-          >
-            <video autoPlay muted loop playsInline className="w-full h-full object-cover">
-              <source src="/videominuto.mp4" type="video/mp4" />
-            </video>
-            <div className="absolute inset-0 bg-gradient-to-b from-black via-transparent to-black opacity-80" />
-          </motion.div>
-
-          {/* LOGO GIGANTE */}
+        <div className="sticky top-0 h-screen w-full overflow-hidden bg-onda-dorada">
+          
+          {/* CONTENEDOR LOGO CENTRAL */}
           <div className="relative z-10 h-full flex flex-col items-center justify-center pointer-events-none px-6">
             <motion.div 
               style={{ scale: scaleScroll, opacity }}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 1.2, ease: "easeOut" }}
-              className="w-full max-w-[850px] flex justify-center relative"
+              className="w-full max-w-[700px] flex flex-col items-center justify-center relative"
             >
+              {/* Resplandor dorado de fondo */}
               <motion.div
-                animate={{ opacity: [0.3, 0.7, 0.3], scale: [1, 1.2, 1] }}
-                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                className="absolute inset-0 bg-[#c5a059]/25 blur-[100px] rounded-full z-0"
+                animate={{ opacity: [0.2, 0.5, 0.2], scale: [1, 1.1, 1] }}
+                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                className="absolute inset-0 bg-[#c5a059]/15 blur-[120px] rounded-full z-0"
               />
+              
               <motion.img 
-                src="/ImproflowLogo.png" 
-                alt="Improflow" 
+                src="/logodannyblanco.png" 
+                alt="Óptica Danny" 
                 animate={{
-                  y: [0, -15, 0],
-                  scale: [1, 1.03, 1],
-                  filter: [
-                    "brightness(1) saturate(1.2) contrast(1)",
-                    "brightness(1.5) saturate(2) contrast(1.1)",
-                    "brightness(1) saturate(1.2) contrast(1)"
-                  ]
+                  y: [0, -10, 0],
                 }}
-                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                className="relative z-10 w-full h-auto object-contain drop-shadow-[0_0_40px_rgba(0,0,0,0.9)]"
+                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                className="relative z-10 w-full h-auto object-contain drop-shadow-[0_0_50px_rgba(0,0,0,0.5)]"
               />
+
+              <motion.div className="mt-8 text-center relative z-20">
+                <h2 className="texto-gradient-gold text-sm md:text-xl tracking-[0.8em] uppercase opacity-80">
+                  Luz para tus ojos
+                </h2>
+              </motion.div>
             </motion.div>
           </div>
 
-          {/* INDICADOR DE SCROLL */}
+          {/* INDICADOR DE SCROLL TUNEADO */}
           <motion.div 
             style={{ opacity }}
             className="absolute bottom-10 left-0 w-full flex flex-col items-center justify-center gap-3 z-30 pointer-events-none"
           >
              <div className="flex flex-col items-center gap-3">
-               <div className="px-4 py-1.5 bg-black/20 backdrop-blur-md rounded-full border border-white/5">
-                  <span className="text-[9px] md:text-[10px] text-white font-black uppercase tracking-[0.6em] whitespace-nowrap">
-                    Scroll para revelar
+               <div className="px-4 py-1.5 bg-[#c5a059]/10 backdrop-blur-md rounded-full border border-[#c5a059]/20">
+                  <span className="text-[9px] text-[#c5a059] font-black uppercase tracking-[0.6em] whitespace-nowrap">
+                    Descubrí tu estilo
                   </span>
                </div>
                
-               <div className="relative w-[1.5px] h-16 bg-white/10 overflow-hidden rounded-full">
+               <div className="relative w-[1.5px] h-16 bg-[#c5a059]/10 overflow-hidden rounded-full">
                   <motion.div 
                     animate={{ y: ["-100%", "100%"] }}
                     transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
@@ -96,7 +81,7 @@ export default function Hero() {
           </motion.div>
         </div>
       ) : (
-        <div className="sticky top-0 h-screen w-full bg-[#050505]" />
+        <div className="sticky top-0 h-screen w-full bg-[#001529]" />
       )}
     </section>
   );
