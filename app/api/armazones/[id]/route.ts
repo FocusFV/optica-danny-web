@@ -5,13 +5,22 @@ import path from "path";
 export const dynamic = "force-dynamic";
 
 if (!admin.apps.length) {
-  // Si estamos en Vercel, la llave viene como un texto plano en las variables de entorno
-  const serviceAccount = process.env.FIREBASE_SERVICE_ACCOUNT
-    ? JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT)
-    : require(path.join(process.cwd(), "firebase-key.json")); // Si falla (en local), busca tu archivo
+  let credential: admin.ServiceAccount;
+
+  // Si la variable de Vercel existe, la usamos directamente
+  if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+    credential = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+  } else {
+    // Si estamos en tu compu local, leemos el archivo usando fs de forma asíncrona 
+    // para que el compilador no intente meterlo a la fuerza en el build
+    const fs = require("fs");
+    const path = require("path");
+    const rutaLlave = path.join(process.cwd(), "firebase-key.json");
+    credential = JSON.parse(fs.readFileSync(rutaLlave, "utf8"));
+  }
 
   admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
+    credential: admin.credential.cert(credential),
     projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
   });
 }
