@@ -14,12 +14,13 @@ if (!admin.apps.length) {
 
 const dbAdmin = admin.firestore();
 
+// 👇 ACÁ ESTÁ EL CAMBIO: Tipamos 'context' exactamente como lo pide Vercel
 export async function GET(
   request: Request,
-  context: { params: { id: string } }
+  context: { params: Promise<{ id: string }> } // <-- Le decimos que params es una Promesa
 ) {
   try {
-    // Forzamos a esperar los parámetros para evitar desajustes de Next.js
+    // Esperamos a la promesa de los params de forma segura
     const params = await context.params;
     const id = params?.id;
     
@@ -31,12 +32,10 @@ export async function GET(
       return NextResponse.json({ error: "Falta el ID" }, { status: 400 });
     }
 
-    // Buscamos en la colección exacta
     const docRef = dbAdmin.collection("armazones").doc(id);
     const docSnap = await docRef.get();
 
     if (!docSnap.exists) {
-      console.log(`❌ ERROR: El ID "${id}" no existe en la colección armazones de Firestore.`);
       return NextResponse.json({ error: "No se encontró el modelo" }, { status: 404 });
     }
 
