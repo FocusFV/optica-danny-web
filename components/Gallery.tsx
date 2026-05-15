@@ -2,17 +2,16 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
+import { Armazon } from '../lib/armazones';
+// 👇 IMPORTAMOS EL LINK PARA PODER NAVEGAR EN NEXT.JS
+import Link from 'next/link';
 
-export default function Gallery() {
-  const images = [
-    "https://images.unsplash.com/photo-1572635196237-14b3f281503f?q=80&w=800&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1511499767350-a15941ea55b1?q=80&w=800&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1509100104035-9e7ca97ca595?q=80&w=800&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1473496169904-658ba7c44d8a?q=80&w=800&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1577174881658-0f30ed549adc?q=80&w=800&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1508296695146-257a814070b4?q=80&w=800&auto=format&fit=crop"
-  ];
+interface GalleryProps {
+  armazones: Armazon[];
+  cargando: boolean;
+}
 
+export default function Gallery({ armazones, cargando }: GalleryProps) {
   return (
     <section id="marcos" className="py-24 px-6 bg-transparent">
       <div className="max-w-7xl mx-auto">
@@ -25,33 +24,73 @@ export default function Gallery() {
           <div className="w-px h-12 bg-gradient-to-b from-[#c5a059] to-transparent mx-auto mt-8 opacity-50"></div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {images.map((src, i) => (
-            <motion.div 
-              key={i}
-              initial={{ opacity: 0, y: 30, scale: 0.95 }}
-              whileInView={{ opacity: 1, y: 0, scale: 1 }}
-              viewport={{ once: false, amount: 0.3 }}
-              transition={{ duration: 0.8, delay: i * 0.1, ease: [0.22, 1, 0.36, 1] }}
-              className="group relative aspect-[4/5] overflow-hidden bg-[#001529] border border-[#c5a059]/10 cursor-pointer rounded-2xl shadow-2xl"
-            >
-              <img 
-                src={src} 
-                alt={`Modelo Óptica Danny ${i + 1}`}
-                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+        {/* 1. ESTADO DE CARGA */}
+        {cargando ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[1, 2, 3].map((n) => (
+              <div 
+                key={n} 
+                className="animate-pulse aspect-[4/5] bg-[#051e34]/50 border border-[#c5a059]/10 rounded-2xl"
               />
-              
-              <div className="absolute inset-0 bg-gradient-to-t from-[#001529] via-transparent to-transparent opacity-80 group-hover:opacity-40 transition-opacity duration-500"></div>
-              
-              <div className="absolute bottom-6 left-6 right-6 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500">
-                <span className="text-[9px] text-[#c5a059] font-black uppercase tracking-[0.3em]">Nueva Colección</span>
-                <p className="text-white text-lg font-bold mt-1">Armazones Premium</p>
-              </div>
+            ))}
+          </div>
+        ) : armazones.length === 0 ? (
+          /* 2. FALLBACK */
+          <div className="text-center py-12">
+            <p className="text-gray-400 text-sm tracking-widest uppercase">No hay armazones disponibles por el momento.</p>
+          </div>
+        ) : (
+          /* 3. GRID DINÁMICO */
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {armazones.map((lente, i) => (
+              <motion.div 
+                key={lente.id}
+                initial={{ opacity: 0, y: 30, scale: 0.95 }}
+                whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                viewport={{ once: false, amount: 0.3 }}
+                transition={{ duration: 0.8, delay: i * 0.1, ease: [0.22, 1, 0.36, 1] }}
+                className="group relative aspect-[4/5] overflow-hidden bg-[#001529] border border-[#c5a059]/10 cursor-pointer rounded-2xl shadow-2xl"
+              >
+                <img 
+                  src={lente.imagen || "https://images.unsplash.com/photo-1572635196237-14b3f281503f?q=80&w=800&auto=format&fit=crop"} 
+                  alt={lente.nombre}
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                />
+                
+                {/* Capa de gradiente interactiva */}
+                <div className="absolute inset-0 bg-gradient-to-t from-[#001529] via-transparent to-transparent opacity-90 group-hover:opacity-60 transition-opacity duration-500"></div>
+                
+                {/* Contenedor de Textos Dinámicos de Firestore */}
+                <div className="absolute bottom-6 left-6 right-6 transition-all duration-500 transform translate-y-2 group-hover:translate-y-0">
+                  <span className="text-[9px] text-[#c5a059] font-black uppercase tracking-[0.3em]">
+                    {lente.stock > 0 ? `Disponibles: ${lente.stock}` : "Agotado"}
+                  </span>
+                  
+                  <h4 className="text-white text-xl font-bold mt-1 uppercase tracking-tight">{lente.nombre}</h4>
+                  
+                  {/* Descripción del producto al hacer Hover */}
+                  <p className="text-gray-400 text-xs mt-1 line-clamp-2 opacity-0 group-hover:opacity-100 transition-opacity duration-500 delay-75">
+                    {lente.descripcion}
+                  </p>
+                  
+                  <div className="mt-3 pt-2 border-t border-[#c5a059]/10 flex justify-between items-center opacity-0 group-hover:opacity-100 transition-opacity duration-500 delay-100">
+                    <span className="text-[#c5a059] font-black text-lg">${lente.precio} MXN</span>
+                    
+                    {/* 🔥 CAMBIAZO ACÁ: Transformamos el span plano en un Link dinámico apuntando al ID de Firebase */}
+                    <Link 
+                      href={`/armazones/${lente.id}`}
+                      className="text-[10px] text-white/50 uppercase tracking-widest border border-white/10 px-2 py-1 rounded hover:bg-white/10 hover:text-white transition-all duration-300"
+                    >
+                      Ver Detalle
+                    </Link>
+                  </div>
+                </div>
 
-              <div className="absolute inset-0 border border-[#c5a059]/0 group-hover:border-[#c5a059]/30 rounded-2xl transition-all duration-500 pointer-events-none"></div>
-            </motion.div>
-          ))}
-        </div>
+                <div className="absolute inset-0 border border-[#c5a059]/0 group-hover:border-[#c5a059]/30 rounded-2xl transition-all duration-500 pointer-events-none"></div>
+              </motion.div>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );

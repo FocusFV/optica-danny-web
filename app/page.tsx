@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Navbar from '../components/Navbar';
 import Hero from '../components/Hero'; 
 import About from '../components/About';
@@ -13,7 +13,27 @@ import Gallery from '../components/Gallery';
 import Contact from '../components/Contact';
 import CustomCursor from '../components/CustomCursor';
 
+// Importamos la función de la librería que acabamos de limpiar
+import { obtenerArmazones, Armazon } from '../lib/armazones';
+
 export default function Home() {
+  const [armazones, setArmazones] = useState<Armazon[]>([]);
+  const [cargando, setCargando] = useState(true);
+
+  useEffect(() => {
+    async function cargarDatos() {
+      try {
+        const datos = await obtenerArmazones();
+        setArmazones(datos);
+      } catch (error) {
+        console.error("Error cargando armazones en el Home:", error);
+      } finally {
+        setCargando(false);
+      }
+    }
+    cargarDatos();
+  }, []);
+
   return (
     <main className="min-h-screen bg-[#001529] text-white relative selection:bg-[#c5a059] selection:text-black">
       
@@ -36,7 +56,13 @@ export default function Home() {
         <Marquee />
 
         <div className="max-w-7xl mx-auto px-6 space-y-40 pb-40 pt-20">
-          <FadeIn><section id="marcos"><Gallery /></section></FadeIn>
+          
+          <FadeIn>
+            <section id="marcos">
+              <Gallery armazones={armazones} cargando={cargando} />
+            </section>
+          </FadeIn>
+          
           <FadeIn><section id="servicios"><Packages /></section></FadeIn>
           <FadeIn><section id="equipo"><Creators /></section></FadeIn>
           <FadeIn><section id="contacto"><Contact /></section></FadeIn>
