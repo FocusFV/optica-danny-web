@@ -5,9 +5,13 @@ import path from "path";
 export const dynamic = "force-dynamic";
 
 if (!admin.apps.length) {
-  const rutaLlave = path.join(process.cwd(), "firebase-key.json");
+  // Si estamos en Vercel, la llave viene como un texto plano en las variables de entorno
+  const serviceAccount = process.env.FIREBASE_SERVICE_ACCOUNT
+    ? JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT)
+    : require(path.join(process.cwd(), "firebase-key.json")); // Si falla (en local), busca tu archivo
+
   admin.initializeApp({
-    credential: admin.credential.cert(rutaLlave),
+    credential: admin.credential.cert(serviceAccount),
     projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
   });
 }
