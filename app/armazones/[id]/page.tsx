@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, use } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 
 interface Armazon {
   id: string;
@@ -15,22 +16,20 @@ interface Armazon {
 
 export default function ArmazonDetallePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
+  const searchParams = useSearchParams();
+  const estadoPagoUrl = searchParams ? searchParams.get("pago") : null; // Atrapa la respuesta de MP
 
   const [armazon, setArmazon] = useState<Armazon | null>(null);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState("");
   const [pestaniaActiva, setPestaniaActiva] = useState("detalles");
 
-  // --- ESTADOS DEL CHECKOUT INTERACTIVO ---
+  // --- ESTADOS DEL CHECKOUT REAL ---
   const [mostrarModal, setMostrarModal] = useState(false);
   const [procesandoPago, setProcesandoPago] = useState(false);
-  const [pagoExitoso, setPagoExitoso] = useState(false);
 
-  // Campos de la tarjeta
-  const [numTarjeta, setNumTarjeta] = useState("");
+  // Campo decorativo para el modal antes de ir a Mercado Pago
   const [nombreTarjeta, setNombreTarjeta] = useState("");
-  const [vencimiento, setVencimiento] = useState("");
-  const [cvv, setCvv] = useState("");
 
   useEffect(() => {
     const cargarDetalle = async () => {
@@ -50,16 +49,37 @@ export default function ArmazonDetallePage({ params }: { params: Promise<{ id: s
     if (id) cargarDetalle();
   }, [id]);
 
-  // Simulación de pasarela de pagos bancaria
-  const manejarPagoSimulado = (e: React.FormEvent) => {
+  // Conexión real con la API de Checkout Pro
+  const manejarPagoMercadoPago = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!armazon) return;
     setProcesandoPago(true);
 
-    // Simulamos los 3 segundos de delay que tarda Stripe/MercadoPago en validar con el banco
-    setTimeout(() => {
+    try {
+      const res = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: armazon.id,
+          nombre: armazon.nombre,
+          precio: armazon.precio,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (data.urlPago) {
+        // Redirige a la pantalla segura de Mercado Pago
+        window.location.href = data.urlPago;
+      } else {
+        alert("Hubo un problema al generar el enlace con Mercado Pago.");
+        setProcesandoPago(false);
+      }
+    } catch (err) {
+      console.error("Error al conectar con la pasarela:", err);
+      alert("Error de conexión con el servidor de pagos.");
       setProcesandoPago(false);
-      setPagoExitoso(true);
-    }, 3000);
+    }
   };
 
   if (cargando) {
@@ -116,6 +136,19 @@ export default function ArmazonDetallePage({ params }: { params: Promise<{ id: s
         <div className="lg:col-span-7 space-y-4 w-full">
           <div className="relative overflow-hidden rounded-3xl bg-gradient-to-b from-white/10 via-transparent to-transparent p-[1px] shadow-2xl">
             <div className="bg-[#031627]/40 rounded-[23px] backdrop-blur-xl p-8 md:p-16 flex items-center justify-center aspect-square relative group">
+              
+              {/* PANTALLA DE ÉXITO (Si vuelve de Mercado Pago con el pago aprobado) */}
+              {estadoPagoUrl === "exitoso" && (
+                <div className="absolute inset-0 bg-black/95 z-30 rounded-[22px] flex flex-col items-center justify-center p-6 text-center animate-fade-in border border-emerald-500/20">
+                  <div className="w-16 h-16 bg-emerald-500/10 text-emerald-400 rounded-full flex items-center justify-center border border-emerald-500/30 text-2xl mb-4 shadow-xl shadow-emerald-500/5">✓</div>
+                  <h3 className="text-xl font-black uppercase tracking-tight text-white">¡Compra Procesada!</h3>
+                  <p className="text-xs text-neutral-400 max-w-xs mt-2 leading-relaxed">Mercado Pago aprobó la transacción de forma segura. En breve nos comunicaremos para coordinar la entrega de tus lentes.</p>
+                  <Link href="/" className="mt-6 text-[10px] font-black uppercase tracking-widest bg-gradient-to-r from-[#c5a059] to-[#dfba75] text-black px-6 py-3 rounded-xl shadow-lg transition-transform active:scale-95">
+                    Seguir Explorando
+                  </Link>
+                </div>
+              )}
+
               <div className="absolute top-4 left-4 z-20">
                 <span className={`text-[9px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full backdrop-blur-md border ${armazon.stock > 0 ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400" : "bg-rose-500/10 border-rose-500/30 text-rose-400"}`}>
                   {armazon.stock > 0 ? "Disponible" : "Sin Stock"}
@@ -172,7 +205,7 @@ export default function ArmazonDetallePage({ params }: { params: Promise<{ id: s
       </main>
 
       {/* =======================================================
-          MODAL DE CHECKOUT GLASSMORPHIC (PAGO CON TARJETA)
+          MODAL DE CONFIRMACIÓN QUE ABRE MERCADO PAGO
          ======================================================= */}
       {mostrarModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-fade-in">
@@ -180,135 +213,63 @@ export default function ArmazonDetallePage({ params }: { params: Promise<{ id: s
             
             {/* Botón Cerrar Modal */}
             <button 
-              onClick={() => { if(!procesandoPago) { setMostrarModal(false); setPagoExitoso(false); } }} 
+              onClick={() => { if(!procesandoPago) { setMostrarModal(false); } }} 
               className="absolute top-4 right-4 text-neutral-400 hover:text-white text-lg font-bold"
             >
               ✕
             </button>
 
-            {/* PANTALLA 1: FORMULARIO DE PAGO */}
-            {!pagoExitoso ? (
-              <>
-                <div className="text-center">
-                  <span className="text-[9px] text-[#c5a059] font-black uppercase tracking-[0.4em] block mb-1">Secure Checkout</span>
-                  <h2 className="text-xl font-black uppercase tracking-tight text-white">Pago Seguro</h2>
-                  <p className="text-xs text-neutral-400 mt-1">Estás pagando: <span className="text-white font-bold">{armazon.nombre}</span></p>
-                </div>
+            <div className="text-center">
+              <span className="text-[9px] text-[#c5a059] font-black uppercase tracking-[0.4em] block mb-1">Secure Checkout</span>
+              <h2 className="text-xl font-black uppercase tracking-tight text-white">Pago Seguro</h2>
+              <p className="text-xs text-neutral-400 mt-1">Estás pagando: <span className="text-white font-bold">{armazon.nombre}</span></p>
+            </div>
 
-                <form onSubmit={manejarPagoSimulado} className="space-y-4">
-                  {/* Total a Pagar Fijo */}
-                  <div className="bg-[#001529] border border-white/5 rounded-xl p-3 flex justify-between items-center text-xs uppercase tracking-wider font-bold">
-                    <span className="text-neutral-400">Total a debitar:</span>
-                    <span className="text-[#c5a059] text-sm font-black">${armazon.precio.toLocaleString("es-MX")} MXN</span>
-                  </div>
-
-                  {/* Número de Tarjeta */}
-                  <div className="space-y-1">
-                    <label className="block text-[9px] uppercase tracking-widest text-neutral-400 font-bold">Número de Tarjeta</label>
-                    <input 
-                      type="text" 
-                      maxLength={16}
-                      required
-                      disabled={procesandoPago}
-                      value={numTarjeta}
-                      onChange={(e) => setNumTarjeta(e.target.value.replace(/\D/g, ""))}
-                      className="w-full bg-[#001529] border border-white/10 rounded-xl p-3 text-sm font-mono tracking-widest text-white placeholder-neutral-700 outline-none focus:border-[#c5a059] transition-all" 
-                      placeholder="4556 7812 9012 3456" 
-                    />
-                  </div>
-
-                  {/* Nombre del Titular */}
-                  <div className="space-y-1">
-                    <label className="block text-[9px] uppercase tracking-widest text-neutral-400 font-bold">Titular de la Tarjeta</label>
-                    <input 
-                      type="text" 
-                      required
-                      disabled={procesandoPago}
-                      value={nombreTarjeta}
-                      onChange={(e) => setNombreTarjeta(e.target.value)}
-                      className="w-full bg-[#001529] border border-white/10 rounded-xl p-3 text-sm uppercase text-white placeholder-neutral-700 outline-none focus:border-[#c5a059] transition-all" 
-                      placeholder="Ej: FEDERICO VILLALBA" 
-                    />
-                  </div>
-
-                  {/* Vencimiento y CVV */}
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-1">
-                      <label className="block text-[9px] uppercase tracking-widest text-neutral-400 font-bold">Vencimiento</label>
-                      <input 
-                        type="text" 
-                        maxLength={5}
-                        required
-                        disabled={procesandoPago}
-                        value={vencimiento}
-                        onChange={(e) => setVencimiento(e.target.value)}
-                        className="w-full bg-[#001529] border border-white/10 rounded-xl p-3 text-sm text-center text-white placeholder-neutral-700 outline-none focus:border-[#c5a059] transition-all" 
-                        placeholder="MM/AA" 
-                      />
-                    </div>
-                    <div className="space-y-1">
-                      <label className="block text-[9px] uppercase tracking-widest text-neutral-400 font-bold">CVV / CVC</label>
-                      <input 
-                        type="password" 
-                        maxLength={3}
-                        required
-                        disabled={procesandoPago}
-                        value={cvv}
-                        onChange={(e) => setCvv(e.target.value.replace(/\D/g, ""))}
-                        className="w-full bg-[#001529] border border-white/10 rounded-xl p-3 text-sm text-center text-white placeholder-neutral-700 outline-none focus:border-[#c5a059] transition-all" 
-                        placeholder="•••" 
-                      />
-                    </div>
-                  </div>
-
-                  {/* Botón de envío con Loader simulado */}
-                  <button 
-                    type="submit" 
-                    disabled={procesandoPago}
-                    className="w-full bg-gradient-to-r from-[#c5a059] to-[#dfba75] text-black font-black text-xs uppercase tracking-[0.2em] p-4 rounded-xl transition-all flex items-center justify-center gap-2 disabled:from-neutral-700 disabled:to-neutral-800 disabled:text-neutral-500"
-                  >
-                    {procesandoPago ? (
-                      <>
-                        <div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin"></div>
-                        <span>Procesando con el banco...</span>
-                      </>
-                    ) : (
-                      <span>Pagar de Forma Segura</span>
-                    )}
-                  </button>
-                </form>
-
-                <div className="text-center text-[8px] text-neutral-500 uppercase tracking-widest">
-                  🔒 Encriptación SSL de 256 bits — Conexión Protegida
-                </div>
-              </>
-            ) : (
-              // PANTALLA 2: ÉXITO TOTAL TRAS PROCESAR EL PAGO
-              <div className="text-center py-6 space-y-4 animate-fade-in">
-                <div className="w-16 h-16 bg-emerald-500/10 border border-emerald-500/30 rounded-full flex items-center justify-center mx-auto text-emerald-400 text-3xl shadow-xl shadow-emerald-500/5">
-                  ✓
-                </div>
-                <div className="space-y-1">
-                  <h3 className="text-xl font-black uppercase tracking-tight text-white">¡Pago Aprobado!</h3>
-                  <p className="text-xs text-neutral-400">El pedido fue registrado con éxito en Óptica Danny.</p>
-                </div>
-
-                <div className="bg-[#001529] border border-white/5 rounded-2xl p-4 text-left font-mono text-[10px] text-neutral-400 space-y-1">
-                  <div><span className="text-neutral-500">Operación:</span> #OD-{Math.floor(10000 + Math.random() * 90000)}</div>
-                  <div><span className="text-neutral-500">Producto:</span> {armazon.nombre}</div>
-                  <div><span className="text-neutral-500">Monto:</span> ${armazon.precio.toLocaleString("es-MX")} MXN</div>
-                  <div className="text-emerald-400 text-center font-bold uppercase tracking-widest text-[8px] pt-2">Autenticación bancaria exitosa</div>
-                </div>
-
-                <button 
-                  onClick={() => { setMostrarModal(false); setPagoExitoso(false); }}
-                  className="w-full bg-white text-black font-black text-xs uppercase tracking-widest p-3 rounded-xl transition-all"
-                >
-                  Entendido
-                </button>
+            <form onSubmit={manejarPagoMercadoPago} className="space-y-4">
+              {/* Total a Pagar Fijo */}
+              <div className="bg-[#001529] border border-white/5 rounded-xl p-3 flex justify-between items-center text-xs uppercase tracking-wider font-bold">
+                <span className="text-neutral-400">Total a debitar:</span>
+                <span className="text-[#c5a059] text-sm font-black">${armazon.precio.toLocaleString("es-MX")} MXN</span>
               </div>
-            )}
 
+              {/* Input Estético de Confirmación */}
+              <div className="space-y-1">
+                <label className="block text-[9px] uppercase tracking-widest text-neutral-400 font-bold">Confirmar Nombre Comprador</label>
+                <input 
+                  type="text" 
+                  required
+                  disabled={procesandoPago}
+                  value={nombreTarjeta}
+                  onChange={(e) => setNombreTarjeta(e.target.value)}
+                  className="w-full bg-[#001529] border border-white/10 rounded-xl p-3 text-sm uppercase text-white placeholder-neutral-700 outline-none focus:border-[#c5a059] transition-all" 
+                  placeholder="Ej: FEDERICO VILLALBA" 
+                />
+              </div>
+
+              <p className="text-[10px] text-neutral-400 text-center leading-relaxed bg-[#001529]/60 p-3 rounded-xl border border-white/5">
+                Al hacer clic abajo, se abrirá la pasarela oficial de <span className="text-white font-bold">Mercado Pago</span> para completar tu transacción de forma totalmente segura.
+              </p>
+
+              {/* Botón de envío que conecta con MP */}
+              <button 
+                type="submit" 
+                disabled={procesandoPago}
+                className="w-full bg-gradient-to-r from-[#c5a059] to-[#dfba75] text-black font-black text-xs uppercase tracking-[0.2em] p-4 rounded-xl transition-all flex items-center justify-center gap-2 disabled:from-neutral-700 disabled:to-neutral-800 disabled:text-neutral-500 shadow-xl active:scale-95"
+              >
+                {procesandoPago ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin"></div>
+                    <span>Abriendo Mercado Pago...</span>
+                  </>
+                ) : (
+                  <span>Iniciar Pago Oficial</span>
+                )}
+              </button>
+            </form>
+
+            <div className="text-center text-[8px] text-neutral-500 uppercase tracking-widest">
+              🔒 Checkout seguro procesado por Mercado Pago
+            </div>
           </div>
         </div>
       )}
