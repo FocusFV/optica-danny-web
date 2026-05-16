@@ -198,9 +198,43 @@ export default function AdminArmazonesPage() {
               </div>
 
               <div className="space-y-1">
-                <label className="block text-[9px] uppercase tracking-widest text-neutral-400 font-bold">URL del render (PNG)</label>
-                <input type="url" value={imagen} onChange={(e) => setImagen(e.target.value)} required className="w-full bg-[#001529]/60 border border-white/10 rounded-xl p-3 text-sm font-mono text-xs text-neutral-300 placeholder-neutral-600 focus:border-[#c5a059] outline-none transition-all" placeholder="https://..." />
-              </div>
+  <label className="block text-[9px] uppercase tracking-widest text-neutral-400 font-bold">Imagen del Armazón (Foto o Render)</label>
+  <div className="relative">
+    <input 
+      type="file" 
+      accept="image/*"
+      onChange={async (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        
+        setMensaje("⏳ Subiendo imagen al servidor de la óptica...");
+        const formData = new FormData();
+        formData.append("file", file);
+
+        try {
+          const res = await fetch("/api/upload", {
+            method: "POST",
+            body: formData
+          });
+          const data = await res.json();
+          if (data.success) {
+            setImagen(data.url); // Guardamos la URL que nos dio Google
+            setMensaje("📸 ¡Imagen subida y procesada con éxito!");
+          } else {
+            setMensaje("❌ Error al procesar la imagen.");
+          }
+        } catch (err) {
+          console.error(err);
+          setMensaje("❌ Falló la conexión con el Storage.");
+        }
+      }}
+      className="w-full bg-[#001529]/60 border border-white/10 rounded-xl p-2.5 text-xs text-neutral-400 file:mr-4 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-[10px] file:font-black file:uppercase file:bg-[#c5a059] file:text-black hover:file:bg-[#b08e4f] file:cursor-pointer transition-all" 
+    />
+  </div>
+  {imagen && (
+    <p className="text-[10px] text-emerald-400 font-semibold mt-1">✓ Imagen lista para publicar</p>
+  )}
+</div>
 
               <div className="space-y-1">
                 <label className="block text-[9px] uppercase tracking-widest text-neutral-400 font-bold">Descripción</label>
