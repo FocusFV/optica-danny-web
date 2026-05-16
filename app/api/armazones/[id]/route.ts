@@ -68,3 +68,35 @@ export async function GET(
     return NextResponse.json({ error: "Error interno del servidor" }, { status: 500 });
   }
 }
+export async function DELETE(
+  request: Request,
+  context: { params: Promise<{ id: string }> }
+) {
+  try {
+    const params = await context.params;
+    const id = params?.id;
+
+    console.log(`🗑️ INTENTANDO BORRAR EL ARMAZÓN CON ID: "${id}"`);
+
+    if (!id) {
+      return NextResponse.json({ error: "Falta el ID" }, { status: 400 });
+    }
+
+    const docRef = dbAdmin.collection("armazones").doc(id);
+    const docSnap = await docRef.get();
+
+    if (!docSnap.exists) {
+      return NextResponse.json({ error: "El armazón no existe" }, { status: 404 });
+    }
+
+    // Borramos el documento de Firestore
+    await docRef.delete();
+    console.log(`✅ ARMAZÓN ${id} ELIMINADO CON ÉXITO.`);
+
+    return NextResponse.json({ success: true, message: "Armazón eliminado correctamente" });
+
+  } catch (error) {
+    console.error("❌ ERROR AL BORRAR ARMAZÓN:", error);
+    return NextResponse.json({ error: "Error interno del servidor" }, { status: 500 });
+  }
+}
