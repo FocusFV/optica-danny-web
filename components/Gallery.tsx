@@ -3,7 +3,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Armazon } from '../lib/armazones';
-// 👇 IMPORTAMOS EL LINK PARA PODER NAVEGAR EN NEXT.JS
 import Link from 'next/link';
 
 interface GalleryProps {
@@ -43,51 +42,59 @@ export default function Gallery({ armazones, cargando }: GalleryProps) {
           /* 3. GRID DINÁMICO */
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {armazones.map((lente, i) => (
-              <motion.div 
-                key={lente.id}
-                initial={{ opacity: 0, y: 30, scale: 0.95 }}
-                whileInView={{ opacity: 1, y: 0, scale: 1 }}
-                viewport={{ once: false, amount: 0.3 }}
-                transition={{ duration: 0.8, delay: i * 0.1, ease: [0.22, 1, 0.36, 1] }}
-                className="group relative aspect-[4/5] overflow-hidden bg-[#001529] border border-[#c5a059]/10 cursor-pointer rounded-2xl shadow-2xl"
+              /* 🔥 TODA LA TARJETA ES EL LINK AHORA */
+              <Link 
+                key={lente.id} 
+                href={`/armazones/${lente.id}`}
+                className="block group relative overflow-hidden rounded-2xl shadow-2xl"
               >
-                <img 
-                  src={lente.imagen || "https://images.unsplash.com/photo-1572635196237-14b3f281503f?q=80&w=800&auto=format&fit=crop"} 
-                  alt={lente.nombre}
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                />
-                
-                {/* Capa de gradiente interactiva */}
-                <div className="absolute inset-0 bg-gradient-to-t from-[#001529] via-transparent to-transparent opacity-90 group-hover:opacity-60 transition-opacity duration-500"></div>
-                
-                {/* Contenedor de Textos Dinámicos de Firestore */}
-                <div className="absolute bottom-6 left-6 right-6 transition-all duration-500 transform translate-y-2 group-hover:translate-y-0">
-                  <span className="text-[9px] text-[#c5a059] font-black uppercase tracking-[0.3em]">
-                    {lente.stock > 0 ? `Disponibles: ${lente.stock}` : "Agotado"}
-                  </span>
+                <motion.div 
+                  initial={{ opacity: 0, y: 30, scale: 0.95 }}
+                  whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                  viewport={{ once: false, amount: 0.3 }}
+                  transition={{ duration: 0.8, delay: i * 0.1, ease: [0.22, 1, 0.36, 1] }}
+                  className="relative aspect-[4/5] overflow-hidden bg-[#001529] border border-[#c5a059]/10 cursor-pointer rounded-2xl"
+                >
+                  {/* Imagen gigante de fondo con el efecto Cover */}
+                  <img 
+                    src={lente.imagen || "https://images.unsplash.com/photo-1572635196237-14b3f281503f?q=80&w=800&auto=format&fit=crop"} 
+                    alt={lente.nombre}
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                  />
                   
-                  <h4 className="text-white text-xl font-bold mt-1 uppercase tracking-tight">{lente.nombre}</h4>
+                  {/* Capa de gradiente interactiva */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#001529] via-transparent to-transparent opacity-90 group-hover:opacity-70 transition-opacity duration-500"></div>
                   
-                  {/* Descripción del producto al hacer Hover */}
-                  <p className="text-gray-400 text-xs mt-1 line-clamp-2 opacity-0 group-hover:opacity-100 transition-opacity duration-500 delay-75">
-                    {lente.descripcion}
-                  </p>
-                  
-                  <div className="mt-3 pt-2 border-t border-[#c5a059]/10 flex justify-between items-center opacity-0 group-hover:opacity-100 transition-opacity duration-500 delay-100">
-                    <span className="text-[#c5a059] font-black text-lg">${lente.precio} MXN</span>
+                  {/* Contenedor de Textos Dinámicos de Firestore */}
+                  <div className="absolute bottom-6 left-6 right-6 transition-all duration-500 transform translate-y-2 group-hover:translate-y-0 z-10">
+                    <span className="text-[9px] text-[#c5a059] font-black uppercase tracking-[0.3em]">
+                      {lente.stock && lente.stock > 0 ? `Disponibles: ${lente.stock}` : "Agotado"}
+                    </span>
                     
-                    {/* 🔥 CAMBIAZO ACÁ: Transformamos el span plano en un Link dinámico apuntando al ID de Firebase */}
-                    <Link 
-                      href={`/armazones/${lente.id}`}
-                      className="text-[10px] text-white/50 uppercase tracking-widest border border-white/10 px-2 py-1 rounded hover:bg-white/10 hover:text-white transition-all duration-300"
-                    >
-                      Ver Detalle
-                    </Link>
+                    <h4 className="text-white text-xl font-bold mt-1 uppercase tracking-tight group-hover:text-[#c5a059] transition-colors duration-300">
+                      {lente.nombre}
+                    </h4>
+                    
+                    {/* Descripción del producto al hacer Hover */}
+                    <p className="text-gray-400 text-xs mt-1 line-clamp-2 opacity-0 group-hover:opacity-100 transition-opacity duration-500 delay-75">
+                      {lente.descripcion}
+                    </p>
+                    
+                    {/* Bloque de precio e indicador visual refinado */}
+                    <div className="mt-3 pt-2 border-t border-[#c5a059]/10 flex justify-between items-center opacity-0 group-hover:opacity-100 transition-opacity duration-500 delay-100">
+                      <span className="text-[#c5a059] font-black text-lg">${lente.precio} <span className="text-[10px] text-gray-500 font-bold">MXN</span></span>
+                      
+                      {/* 🔥 Indicador visual de elite en lugar del botón tosco de antes */}
+                      <span className="text-[10px] text-white/50 uppercase tracking-widest group-hover:text-white group-hover:translate-x-1 transition-all duration-300 font-bold">
+                        Ver más →
+                      </span>
+                    </div>
                   </div>
-                </div>
 
-                <div className="absolute inset-0 border border-[#c5a059]/0 group-hover:border-[#c5a059]/30 rounded-2xl transition-all duration-500 pointer-events-none"></div>
-              </motion.div>
+                  {/* Borde Luxury sutil en hover */}
+                  <div className="absolute inset-0 border border-[#c5a059]/0 group-hover:border-[#c5a059]/30 rounded-2xl transition-all duration-500 pointer-events-none"></div>
+                </motion.div>
+              </Link>
             ))}
           </div>
         )}
