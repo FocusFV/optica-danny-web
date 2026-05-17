@@ -17,7 +17,7 @@ interface Armazon {
 export default function ArmazonDetallePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const searchParams = useSearchParams();
-  const estadoPagoUrl = searchParams ? searchParams.get("pago") : null; // Atrapa la respuesta de MP
+  const estadoPagoUrl = searchParams ? searchParams.get("pago") : null; 
 
   const [armazon, setArmazon] = useState<Armazon | null>(null);
   const [cargando, setCargando] = useState(true);
@@ -27,10 +27,18 @@ export default function ArmazonDetallePage({ params }: { params: Promise<{ id: s
   // --- ESTADOS DEL CHECKOUT REAL ---
   const [mostrarModal, setMostrarModal] = useState(false);
   const [procesandoPago, setProcesandoPago] = useState(false);
+  const [stockDescontado, setStockDescontado] = useState(false);
 
-  // Campo decorativo para el modal antes de ir a Mercado Pago
+  // Código de operación único para el cliente (se genera una vez en el cliente)
+  const [codigoOperacion, setCodigoOperacion] = useState("");
   const [nombreTarjeta, setNombreTarjeta] = useState("");
 
+  // Generamos un código random facha para el recibo post-compra
+  useEffect(() => {
+    setCodigoOperacion(`OD-${Math.floor(10000 + Math.random() * 90000)}`);
+  }, []);
+
+  // 1. CARGA DEL DETALLE ORIGINAL
   useEffect(() => {
     const cargarDetalle = async () => {
       try {
@@ -49,7 +57,32 @@ export default function ArmazonDetallePage({ params }: { params: Promise<{ id: s
     if (id) cargarDetalle();
   }, [id]);
 
-  // Conexión real con la API de Checkout Pro
+  // 2. DETECTA EL PAGO EXITOSO Y DESCUENTA STOCK
+  useEffect(() => {
+    const aplicarDescuentoStock = async () => {
+      if (estadoPagoUrl === "exitoso" && armazon && !stockDescontado) {
+        try {
+          const res = await fetch("/api/armazones/descontar", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id: armazon.id }),
+          });
+          
+          if (res.ok) {
+            console.log("🔥 Stock actualizado en Firestore correctamente.");
+            setStockDescontado(true);
+            setArmazon(prev => prev ? { ...prev, stock: prev.stock - 1 } : null);
+          }
+        } catch (err) {
+          console.error("Error al intentar descontar el stock:", err);
+        }
+      }
+    };
+
+    aplicarDescuentoStock();
+  }, [estadoPagoUrl, armazon, stockDescontado]);
+
+  // Conexión real con Mercado Pago
   const manejarPagoMercadoPago = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!armazon) return;
@@ -69,15 +102,13 @@ export default function ArmazonDetallePage({ params }: { params: Promise<{ id: s
       const data = await res.json();
 
       if (data.urlPago) {
-        // Redirige a la pantalla segura de Mercado Pago
         window.location.href = data.urlPago;
       } else {
-        alert("Hubo un problema al generar el enlace con Mercado Pago.");
+        alert("Hubo un problema al generar el enlace.");
         setProcesandoPago(false);
       }
     } catch (err) {
       console.error("Error al conectar con la pasarela:", err);
-      alert("Error de conexión con el servidor de pagos.");
       setProcesandoPago(false);
     }
   };
@@ -105,12 +136,19 @@ export default function ArmazonDetallePage({ params }: { params: Promise<{ id: s
     );
   }
 
-  // Setup WhatsApp
+  // Configuración de Mensajes de WhatsApp (Estándar vs Post-Compra)
   const numeroTelefono = "529990000000"; 
-  const textoMensaje = encodeURIComponent(
-    `¡Hola Óptica Danny! 👋 Me interesa consultar disponibilidad del armazón "${armazon.nombre}". \n\nEnlace: https://optica-danny.vercel.app/armazones/${armazon.id}`
+  
+  const mensajeConsulta = encodeURIComponent(
+    `¡Hola Óptica Danny! 👋 Me interesa consultar disponibilidad del armazón "${armazon.nombre}".\n\nEnlace: https://optica-danny.vercel.app/armazones/${armazon.id}`
   );
-  const linkWhatsApp = `https://wa.me/${numeroTelefono}?text=${textoMensaje}`;
+  
+  const mensajePostCompra = encodeURIComponent(
+    `¡Hola Óptica Danny! 💳✨ Acabo de realizar el pago de mi armazón "${armazon.nombre}" a través de la web.\n\n📄 Código de Operación: #${codigoOperacion}\n💰 Monto: $${armazon.precio.toLocaleString("es-MX")} MXN\n📍 Quiero coordinar la entrega en Mérida.`
+  );
+
+  const linkWhatsAppConsulta = `https://wa.me/${numeroTelefono}?text=${mensajeConsulta}`;
+  const linkWhatsAppPostCompra = `https://wa.me/${numeroTelefono}?text=${mensajePostCompra}`;
 
   return (
     <div className="min-h-screen bg-[#000e1a] text-white relative overflow-hidden flex flex-col justify-between selection:bg-[#c5a059] selection:text-black">
@@ -132,19 +170,40 @@ export default function ArmazonDetallePage({ params }: { params: Promise<{ id: s
       {/* CONTENEDOR FICHA TÉCNICA */}
       <main className="relative z-10 w-full max-w-6xl mx-auto px-4 md:px-8 py-8 md:py-16 my-auto grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-start">
         
-        {/* FOTO LENTE */}
+        {/* FOTO LENTE / COMPONENTES POST COMPRA */}
         <div className="lg:col-span-7 space-y-4 w-full">
           <div className="relative overflow-hidden rounded-3xl bg-gradient-to-b from-white/10 via-transparent to-transparent p-[1px] shadow-2xl">
             <div className="bg-[#031627]/40 rounded-[23px] backdrop-blur-xl p-8 md:p-16 flex items-center justify-center aspect-square relative group">
               
-              {/* PANTALLA DE ÉXITO (Si vuelve de Mercado Pago con el pago aprobado) */}
+              {/* PANTALLA EXPERIENCIA POST COMPRA PREMIUM */}
               {estadoPagoUrl === "exitoso" && (
-                <div className="absolute inset-0 bg-black/95 z-30 rounded-[22px] flex flex-col items-center justify-center p-6 text-center animate-fade-in border border-emerald-500/20">
-                  <div className="w-16 h-16 bg-emerald-500/10 text-emerald-400 rounded-full flex items-center justify-center border border-emerald-500/30 text-2xl mb-4 shadow-xl shadow-emerald-500/5">✓</div>
-                  <h3 className="text-xl font-black uppercase tracking-tight text-white">¡Compra Procesada!</h3>
-                  <p className="text-xs text-neutral-400 max-w-xs mt-2 leading-relaxed">Mercado Pago aprobó la transacción de forma segura. En breve nos comunicaremos para coordinar la entrega de tus lentes.</p>
-                  <Link href="/" className="mt-6 text-[10px] font-black uppercase tracking-widest bg-gradient-to-r from-[#c5a059] to-[#dfba75] text-black px-6 py-3 rounded-xl shadow-lg transition-transform active:scale-95">
-                    Seguir Explorando
+                <div className="absolute inset-0 bg-[#010b14]/98 z-30 rounded-[22px] flex flex-col items-center justify-center p-6 md:p-10 text-center animate-fade-in border border-emerald-500/20 shadow-2xl">
+                  <div className="w-16 h-16 bg-emerald-500/10 text-emerald-400 rounded-full flex items-center justify-center border border-emerald-500/30 text-2xl mb-4 shadow-xl shadow-emerald-500/10 animate-bounce">✓</div>
+                  <span className="text-[9px] text-[#c5a059] font-black uppercase tracking-[0.4em] block mb-1">Pago Verificado</span>
+                  <h3 className="text-2xl font-black uppercase tracking-tight text-white">¡Gracias por tu compra!</h3>
+                  <p className="text-xs text-neutral-400 max-w-sm mt-2 leading-relaxed">El cobro de tu armazón se procesó de forma segura.</p>
+                  
+                  {/* Recibo digital facha */}
+                  <div className="w-full max-w-xs bg-black/40 border border-white/5 rounded-2xl p-4 my-5 text-left font-mono text-[11px] text-neutral-400 space-y-1.5 backdrop-blur-md">
+                    <div><span className="text-neutral-600">Operación:</span> <span className="text-white font-bold">#{codigoOperacion}</span></div>
+                    <div><span className="text-neutral-600">Producto:</span> <span className="text-white">{armazon.nombre}</span></div>
+                    <div><span className="text-neutral-600">Monto:</span> <span className="text-[#c5a059] font-bold">${armazon.precio.toLocaleString("es-MX")} MXN</span></div>
+                    <div className="text-[9px] text-emerald-400 text-center uppercase tracking-widest font-bold pt-2 border-t border-white/5 mt-2">Listo para entrega en Mérida</div>
+                  </div>
+
+                  {/* Botón de Acción Principal Post Compra */}
+                  <a 
+                    href={linkWhatsAppPostCompra} 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="w-full max-w-xs bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-black text-xs uppercase tracking-[0.2em] p-4 rounded-xl shadow-lg hover:from-emerald-600 hover:to-teal-700 transition-all flex items-center justify-center gap-2 transform active:scale-95"
+                  >
+                    <span>Coordinar por WhatsApp</span>
+                    <span>💬</span>
+                  </a>
+
+                  <Link href="/" className="mt-4 text-[9px] font-bold uppercase tracking-widest text-neutral-500 hover:text-white transition-colors">
+                    Volver a la galería
                   </Link>
                 </div>
               )}
@@ -185,7 +244,6 @@ export default function ArmazonDetallePage({ params }: { params: Promise<{ id: s
 
           {/* DOBLE BOTÓN DE ACCIÓN (WHATSAPP + TARJETA) */}
           <div className="space-y-3">
-            {/* Botón Compra Directa Tarjeta */}
             <button 
               onClick={() => setMostrarModal(true)}
               disabled={armazon.stock <= 0}
@@ -195,8 +253,7 @@ export default function ArmazonDetallePage({ params }: { params: Promise<{ id: s
               <span>💳</span>
             </button>
 
-            {/* Botón WhatsApp */}
-            <a href={linkWhatsApp} target="_blank" rel="noopener noreferrer" className="w-full border border-white/10 bg-white/5 hover:bg-white/10 text-white font-black text-xs uppercase tracking-[0.25em] p-4 rounded-xl transition-all flex items-center justify-center gap-3">
+            <a href={linkWhatsAppConsulta} target="_blank" rel="noopener noreferrer" className="w-full border border-white/10 bg-white/5 hover:bg-white/10 text-white font-black text-xs uppercase tracking-[0.25em] p-4 rounded-xl transition-all flex items-center justify-center gap-3">
               <span>Consultar por WhatsApp</span>
               <span>💬</span>
             </a>
@@ -204,14 +261,11 @@ export default function ArmazonDetallePage({ params }: { params: Promise<{ id: s
         </div>
       </main>
 
-      {/* =======================================================
-          MODAL DE CONFIRMACIÓN QUE ABRE MERCADO PAGO
-         ======================================================= */}
+      {/* MODAL DE CONFIRMACIÓN QUE ABRE MERCADO PAGO */}
       {mostrarModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-fade-in">
           <div className="relative w-full max-w-md bg-[#021120]/95 border border-white/10 p-6 md:p-8 rounded-3xl shadow-2xl space-y-6">
             
-            {/* Botón Cerrar Modal */}
             <button 
               onClick={() => { if(!procesandoPago) { setMostrarModal(false); } }} 
               className="absolute top-4 right-4 text-neutral-400 hover:text-white text-lg font-bold"
@@ -226,13 +280,11 @@ export default function ArmazonDetallePage({ params }: { params: Promise<{ id: s
             </div>
 
             <form onSubmit={manejarPagoMercadoPago} className="space-y-4">
-              {/* Total a Pagar Fijo */}
               <div className="bg-[#001529] border border-white/5 rounded-xl p-3 flex justify-between items-center text-xs uppercase tracking-wider font-bold">
                 <span className="text-neutral-400">Total a debitar:</span>
                 <span className="text-[#c5a059] text-sm font-black">${armazon.precio.toLocaleString("es-MX")} MXN</span>
               </div>
 
-              {/* Input Estético de Confirmación */}
               <div className="space-y-1">
                 <label className="block text-[9px] uppercase tracking-widest text-neutral-400 font-bold">Confirmar Nombre Comprador</label>
                 <input 
@@ -250,7 +302,6 @@ export default function ArmazonDetallePage({ params }: { params: Promise<{ id: s
                 Al hacer clic abajo, se abrirá la pasarela oficial de <span className="text-white font-bold">Mercado Pago</span> para completar tu transacción de forma totalmente segura.
               </p>
 
-              {/* Botón de envío que conecta con MP */}
               <button 
                 type="submit" 
                 disabled={procesandoPago}
