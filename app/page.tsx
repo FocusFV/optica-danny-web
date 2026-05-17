@@ -15,7 +15,6 @@ import CustomCursor from '../components/CustomCursor';
 
 import { obtenerArmazones, Armazon } from '../lib/armazones';
 
-// Extendemos la interfaz local por si a futuro Firestore expone estos datos limpios
 interface ArmazonExtendida extends Armazon {
   genero?: string;
   tipo?: string;
@@ -30,9 +29,12 @@ export default function Home() {
   const [tipoActivo, setTipoActivo] = useState("todos"); // todos, oftalmicos, sol, inteligentes
   const [generoActivo, setGeneroActivo] = useState("todos"); // todos, hombre, mujer, unisex
   const [precioMaximo, setPrecioMaximo] = useState<number>(12000); // Rango de precio
+  
+  // 🔥 NUEVO ESTADO: Controla si se ocultan los lentes sin stock
+  const [soloDisponibles, setSoloDisponibles] = useState(false);
 
-  // --- ESTADO DE PAGINACIÓN (Evita las 100 tarjetas de golpe) ---
-  const [limiteVisible, setLimiteVisible] = useState(12);
+  // --- ESTADO DE PAGINACIÓN ---
+  const [limiteVisible, setLimiteVisible] = useState(12); //
 
   useEffect(() => {
     async function cargarDatos() {
@@ -48,51 +50,53 @@ export default function Home() {
     cargarDatos();
   }, []);
 
-  // --- MOTOR DE FILTRADO INTELIGENTE COMBINADO ---
+  // --- MOTOR DE FILTRADO INTELIGENTE COMBINADO MÁS STOCK ---
   const armazonesFiltrados = armazones.filter((item) => {
-    const nombreLower = item.nombre.toLowerCase();
-    const descLower = (item.descripcion || "").toLowerCase();
+    const nombreLower = item.nombre.toLowerCase(); //
+    const descLower = (item.descripcion || "").toLowerCase(); //
 
     // 1. Filtro por Buscador de Texto
-    const coincideTexto = nombreLower.includes(busqueda.toLowerCase()) || descLower.includes(busqueda.toLowerCase());
+    const coincideTexto = nombreLower.includes(busqueda.toLowerCase()) || descLower.includes(busqueda.toLowerCase()); //
     
     // 2. Filtro por Precio Máximo
-    const coincidePrecio = item.precio <= precioMaximo;
+    const coincidePrecio = item.precio <= precioMaximo; //
 
     // 3. Filtro Inteligente por Tipo de Lente
-    let coincideTipo = true;
-    if (tipoActivo === "sol") {
-      coincideTipo = nombreLower.includes("sol") || descLower.includes("sol");
-    } else if (tipoActivo === "inteligentes") {
-      coincideTipo = nombreLower.includes("smart") || nombreLower.includes("inteligente") || descLower.includes("smart") || descLower.includes("meta");
-    } else if (tipoActivo === "oftalmicos") {
-      // Si no es de sol ni inteligente, se clasifica como oftálmico/recetado tradicional
-      const esSol = nombreLower.includes("sol") || descLower.includes("sol");
-      const esSmart = nombreLower.includes("smart") || nombreLower.includes("inteligente") || descLower.includes("smart");
-      coincideTipo = !esSol && !esSmart;
+    let coincideTipo = true; //
+    if (tipoActivo === "sol") { //
+      coincideTipo = nombreLower.includes("sol") || descLower.includes("sol"); //
+    } else if (tipoActivo === "inteligentes") { //
+      coincideTipo = nombreLower.includes("smart") || nombreLower.includes("inteligente") || descLower.includes("smart") || descLower.includes("meta"); //
+    } else if (tipoActivo === "oftalmicos") { //
+      const esSol = nombreLower.includes("sol") || descLower.includes("sol"); //
+      const esSmart = nombreLower.includes("smart") || nombreLower.includes("inteligente") || descLower.includes("smart"); //
+      coincideTipo = !esSol && !esSmart; //
     }
 
     // 4. Filtro Inteligente por Género / Sexo
-    let coincideGenero = true;
-    if (generoActivo === "hombre") {
-      coincideGenero = nombreLower.includes("hombre") || descLower.includes("hombre") || descLower.includes("masculino");
-    } else if (generoActivo === "mujer") {
-      coincideGenero = nombreLower.includes("mujer") || descLower.includes("mujer") || descLower.includes("femenino") || nombreLower.includes("dama");
-    } else if (generoActivo === "unisex") {
-      coincideGenero = nombreLower.includes("unisex") || descLower.includes("unisex") || (!nombreLower.includes("hombre") && !descLower.includes("mujer"));
+    let coincideGenero = true; //
+    if (generoActivo === "hombre") { //
+      coincideGenero = nombreLower.includes("hombre") || descLower.includes("hombre") || descLower.includes("masculino"); //
+    } else if (generoActivo === "mujer") { //
+      coincideGenero = nombreLower.includes("mujer") || descLower.includes("mujer") || descLower.includes("femenino") || nombreLower.includes("dama"); //
+    } else if (generoActivo === "unisex") { //
+      coincideGenero = nombreLower.includes("unisex") || descLower.includes("unisex") || (!nombreLower.includes("hombre") && !descLower.includes("mujer")); //
     }
 
+    // 🔥 5. NUEVA REGLA: Filtro de Disponibilidad de Stock real
+    // Si 'soloDisponibles' está activo, el item debe tener stock mayor a 0. Si no está activo, pasa de largo.
+    const coincideStock = !soloDisponibles || (item.stock && item.stock > 0);
+
     // El elemento debe cumplir TODOS los filtros en simultáneo
-    return coincideTexto && coincidePrecio && coincideTipo && coincideGenero;
+    return coincideTexto && coincidePrecio && coincideTipo && coincideGenero && coincideStock;
   });
 
-  // Cortamos la lista final para mostrar solo la cantidad del límite de paginación
-  const armazonesVisibles = armazonesFiltrados.slice(0, limiteVisible);
+  const armazonesVisibles = armazonesFiltrados.slice(0, limiteVisible); //
 
-  // Cada vez que cambie un filtro, reseteamos el límite de tarjetas para no confundir al usuario
+  // Reseteamos la paginación si se toca cualquier filtro, incluido el de stock
   useEffect(() => {
-    setLimiteVisible(12);
-  }, [busqueda, tipoActivo, generoActivo, precioMaximo]);
+    setLimiteVisible(12); //
+  }, [busqueda, tipoActivo, generoActivo, precioMaximo, soloDisponibles]);
 
   return (
     <main className="min-h-screen bg-[#001529] text-white relative selection:bg-[#c5a059] selection:text-black">
@@ -120,9 +124,24 @@ export default function Home() {
             <section id="marcos" className="space-y-10 scroll-mt-24">
               
               <div className="bg-[#021120]/90 border border-white/5 rounded-3xl p-6 md:p-8 backdrop-blur-xl shadow-2xl max-w-5xl mx-auto w-full space-y-6">
-                <div className="border-b border-white/5 pb-3">
-                  <span className="text-[9px] text-[#c5a059] font-black uppercase tracking-[0.4em] block mb-1">Advanced Search</span>
-                  <h2 className="text-lg font-black uppercase tracking-wide text-white">Filtrar Colección</h2>
+                <div className="border-b border-white/5 pb-3 flex flex-col sm:flex-row justify-between sm:items-center gap-2">
+                  <div>
+                    <span className="text-[9px] text-[#c5a059] font-black uppercase tracking-[0.4em] block mb-1">Advanced Search</span>
+                    <h2 className="text-lg font-black uppercase tracking-wide text-white">Filtrar Colección</h2>
+                  </div>
+                  
+                  {/* 🔥 NUEVO: Botón switch de disponibilidad con estilo luxury */}
+                  <button
+                    type="button"
+                    onClick={() => setSoloDisponibles(!soloDisponibles)}
+                    className={`px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest border transition-all self-start sm:self-center ${
+                      soloDisponibles 
+                        ? "bg-emerald-500/10 border-emerald-500/40 text-emerald-400 shadow-lg shadow-emerald-500/5" 
+                        : "bg-black/20 border-white/5 text-neutral-400 hover:text-white"
+                    }`}
+                  >
+                    {soloDisponibles ? "⚡ Mostrando Solo Disponibles" : "👁️ Mostrar Sin Stock"}
+                  </button>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -215,10 +234,10 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* GALERÍA DINÁMICA (Solo recibe el subconjunto paginado) */}
+              {/* GALERÍA DINÁMICA */}
               <Gallery armazones={armazonesVisibles} cargando={cargando} />
 
-              {/* BOTÓN DE CARGAR MÁS (Aparece solo si hay más elementos de los visibles en el límite) */}
+              {/* BOTÓN DE CARGAR MÁS */}
               {!cargando && armazonesFiltrados.length > limiteVisible && (
                 <div className="text-center pt-6">
                   <button

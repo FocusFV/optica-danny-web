@@ -57,7 +57,7 @@ export default function ArmazonDetallePage({ params }: { params: Promise<{ id: s
     if (id) cargarDetalle();
   }, [id]);
 
-  // 2. DETECTA EL PAGO EXITOSO Y DESCUENTA STOCK
+  // 2. DETECTA EL PAGO EXITOSO, DESCUENTA STOCK Y REGISTRA LA VENTA
   useEffect(() => {
     const aplicarDescuentoStock = async () => {
       if (estadoPagoUrl === "exitoso" && armazon && !stockDescontado) {
@@ -65,22 +65,27 @@ export default function ArmazonDetallePage({ params }: { params: Promise<{ id: s
           const res = await fetch("/api/armazones/descontar", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ id: armazon.id }),
+            body: JSON.stringify({ 
+              id: armazon.id,
+              nombreLente: armazon.nombre,
+              precio: armazon.precio,
+              nombreComprador: nombreTarjeta || "Cliente Web"
+            }),
           });
           
           if (res.ok) {
-            console.log("🔥 Stock actualizado en Firestore correctamente.");
+            console.log("🔥 Stock actualizado y venta registrada en Firestore correctamente.");
             setStockDescontado(true);
             setArmazon(prev => prev ? { ...prev, stock: prev.stock - 1 } : null);
           }
         } catch (err) {
-          console.error("Error al intentar descontar el stock:", err);
+          console.error("Error al intentar procesar la venta y stock:", err);
         }
       }
     };
 
     aplicarDescuentoStock();
-  }, [estadoPagoUrl, armazon, stockDescontado]);
+  }, [estadoPagoUrl, armazon, stockDescontado, nombreTarjeta]);
 
   // Conexión real con Mercado Pago
   const manejarPagoMercadoPago = async (e: React.FormEvent) => {
@@ -175,7 +180,7 @@ export default function ArmazonDetallePage({ params }: { params: Promise<{ id: s
           <div className="relative overflow-hidden rounded-3xl bg-gradient-to-b from-white/10 via-transparent to-transparent p-[1px] shadow-2xl">
             <div className="bg-[#031627]/40 rounded-[23px] backdrop-blur-xl p-8 md:p-16 flex items-center justify-center aspect-square relative group">
               
-              {/* PANTALLA EXPERIENCIA POST COMPRA PREMIUM */}
+              {/* PANTALLA EXPERIENCIA POST COMPRA PREMIUM (ÉXITO) */}
               {estadoPagoUrl === "exitoso" && (
                 <div className="absolute inset-0 bg-[#010b14]/98 z-30 rounded-[22px] flex flex-col items-center justify-center p-6 md:p-10 text-center animate-fade-in border border-emerald-500/20 shadow-2xl">
                   <div className="w-16 h-16 bg-emerald-500/10 text-emerald-400 rounded-full flex items-center justify-center border border-emerald-500/30 text-2xl mb-4 shadow-xl shadow-emerald-500/10 animate-bounce">✓</div>
@@ -183,7 +188,6 @@ export default function ArmazonDetallePage({ params }: { params: Promise<{ id: s
                   <h3 className="text-2xl font-black uppercase tracking-tight text-white">¡Gracias por tu compra!</h3>
                   <p className="text-xs text-neutral-400 max-w-sm mt-2 leading-relaxed">El cobro de tu armazón se procesó de forma segura.</p>
                   
-                  {/* Recibo digital facha */}
                   <div className="w-full max-w-xs bg-black/40 border border-white/5 rounded-2xl p-4 my-5 text-left font-mono text-[11px] text-neutral-400 space-y-1.5 backdrop-blur-md">
                     <div><span className="text-neutral-600">Operación:</span> <span className="text-white font-bold">#{codigoOperacion}</span></div>
                     <div><span className="text-neutral-600">Producto:</span> <span className="text-white">{armazon.nombre}</span></div>
@@ -191,7 +195,6 @@ export default function ArmazonDetallePage({ params }: { params: Promise<{ id: s
                     <div className="text-[9px] text-emerald-400 text-center uppercase tracking-widest font-bold pt-2 border-t border-white/5 mt-2">Listo para entrega en Mérida</div>
                   </div>
 
-                  {/* Botón de Acción Principal Post Compra */}
                   <a 
                     href={linkWhatsAppPostCompra} 
                     target="_blank" 
@@ -203,6 +206,38 @@ export default function ArmazonDetallePage({ params }: { params: Promise<{ id: s
                   </a>
 
                   <Link href="/" className="mt-4 text-[9px] font-bold uppercase tracking-widest text-neutral-500 hover:text-white transition-colors">
+                    Volver a la galería
+                  </Link>
+                </div>
+              )}
+
+              {/* ❌ PANTALLA DE ERROR / PAGO FALLIDO */}
+              {estadoPagoUrl === "fallido" && (
+                <div className="absolute inset-0 bg-[#010b14]/98 z-30 rounded-[22px] flex flex-col items-center justify-center p-6 md:p-10 text-center animate-fade-in border border-rose-500/20 shadow-2xl">
+                  <div className="w-16 h-16 bg-rose-500/10 text-rose-400 rounded-full flex items-center justify-center border border-rose-500/30 text-2xl mb-4 shadow-xl shadow-rose-500/5">✕</div>
+                  <span className="text-[9px] text-rose-400 font-black uppercase tracking-[0.4em] block mb-1">Transacción Cancelada</span>
+                  <h3 className="text-2xl font-black uppercase tracking-tight text-white">Hubo un bardo con el pago</h3>
+                  <p className="text-xs text-neutral-400 max-w-sm mt-2 leading-relaxed">No te preocupes, no se hizo ningún cargo. Tu armazón sigue disponible en stock. Podés reintentar ahora o coordinar directo con el local.</p>
+                  
+                  <div className="flex flex-col sm:flex-row gap-3 mt-6 w-full max-w-xs">
+                    <button 
+                      onClick={() => setMostrarModal(true)}
+                      className="flex-1 bg-white text-black font-black text-[10px] uppercase tracking-[0.15em] p-3.5 rounded-xl shadow-lg transition-all transform active:scale-95"
+                    >
+                      Reintentar Pago
+                    </button>
+                    
+                    <a 
+                      href={`https://wa.me/${numeroTelefono}?text=${encodeURIComponent(`¡Hola Óptica Danny! 👋 Tuve un problema al intentar pagar el armazón "${armazon.nombre}" por la web. ¿Me dan una mano para completarlo?`)}`}
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="flex-1 border border-white/10 bg-white/5 text-white font-black text-[10px] uppercase tracking-[0.15em] p-3.5 rounded-xl transition-colors hover:bg-white/10 flex items-center justify-center gap-1"
+                    >
+                      Pedir Ayuda 💬
+                    </a>
+                  </div>
+
+                  <Link href="/" className="mt-6 text-[9px] font-bold uppercase tracking-widest text-neutral-500 hover:text-white transition-colors">
                     Volver a la galería
                   </Link>
                 </div>

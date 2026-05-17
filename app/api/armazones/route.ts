@@ -84,3 +84,32 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "No se pudo guardar el producto" }, { status: 500 });
   }
 }
+
+// 🔥 3. EL PUT NUEVO (Para editar el armazón directo en un solo viaje con Firebase Admin)
+export async function PUT(request: Request) {
+  try {
+    console.log("=== ACTUALIZANDO ARMAZÓN CON ADMIN ===");
+    const body = await request.json();
+    const { id, nombre, precio, stock, descripcion } = body;
+
+    if (!id) {
+      return NextResponse.json({ error: "Falta el ID del armazón" }, { status: 400 });
+    }
+
+    // Buscamos el documento por su ID en Firestore
+    const productoRef = dbAdmin.collection("armazones").doc(id);
+
+    // Impactamos los cambios de una
+    await productoRef.update({
+      nombre: nombre || "Sin nombre",
+      precio: Number(precio) || 0,
+      stock: Number(stock) || 0,
+      descripcion: descripcion || ""
+    });
+
+    return NextResponse.json({ success: true, message: "Armazón actualizado impecable" });
+  } catch (error: any) {
+    console.error("❌ ERROR AL ACTUALIZAR ARMAZÓN:", error);
+    return NextResponse.json({ error: "No se pudo actualizar el producto", detalles: error.message }, { status: 500 });
+  }
+}
