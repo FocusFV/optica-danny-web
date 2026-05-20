@@ -85,12 +85,12 @@ export async function POST(request: Request) {
   }
 }
 
-// 🔥 3. EL PUT NUEVO (Para editar el armazón directo en un solo viaje con Firebase Admin)
+// 3. EL PUT NUEVO (Para editar el armazón directo en un solo viaje con Firebase Admin)
 export async function PUT(request: Request) {
   try {
     console.log("=== ACTUALIZANDO ARMAZÓN CON ADMIN ===");
     const body = await request.json();
-    const { id, nombre, precio, stock, descripcion } = body;
+    const { id, nombre, precio, stock, descripcion, imagen } = body;
 
     if (!id) {
       return NextResponse.json({ error: "Falta el ID del armazón" }, { status: 400 });
@@ -99,17 +99,49 @@ export async function PUT(request: Request) {
     // Buscamos el documento por su ID en Firestore
     const productoRef = dbAdmin.collection("armazones").doc(id);
 
-    // Impactamos los cambios de una
-    await productoRef.update({
+    // Mapeamos los datos básicos para la actualización
+    const datosActualizados: any = {
       nombre: nombre || "Sin nombre",
       precio: Number(precio) || 0,
       stock: Number(stock) || 0,
       descripcion: descripcion || ""
-    });
+    };
+
+    // Si pasaste una nueva URL de imagen desde Cloudinary, la incluimos en el update
+    if (imagen) {
+      datosActualizados.imagen = imagen;
+    }
+
+    // Impactamos los cambios de una
+    await productoRef.update(datosActualizados);
 
     return NextResponse.json({ success: true, message: "Armazón actualizado impecable" });
   } catch (error: any) {
     console.error("❌ ERROR AL ACTUALIZAR ARMAZÓN:", error);
     return NextResponse.json({ error: "No se pudo actualizar el producto", detalles: error.message }, { status: 500 });
+  }
+}
+
+// 🔥 4. EL DELETE NUEVO (Para borrar el armazón de Firestore al tocar el tachito)
+export async function DELETE(request: Request) {
+  try {
+    console.log("=== ELIMINANDO ARMAZÓN CON ADMIN ===");
+    const body = await request.json();
+    const { id } = body;
+
+    if (!id) {
+      return NextResponse.json({ error: "Falta el ID del armazón a eliminar" }, { status: 400 });
+    }
+
+    // Apuntamos al documento exacto en la colección de la base de datos
+    const productoRef = dbAdmin.collection("armazones").doc(id);
+
+    // Lo borramos de la faz de la tierra
+    await productoRef.delete();
+
+    return NextResponse.json({ success: true, message: "Modelo eliminado correctamente" });
+  } catch (error: any) {
+    console.error("❌ ERROR AL ELIMINAR ARMAZÓN:", error);
+    return NextResponse.json({ error: "No se pudo eliminar el producto", detalles: error.message }, { status: 500 });
   }
 }

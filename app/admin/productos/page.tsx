@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+// 👇 Importamos Script de Next para cargar el widget de Cloudinary de forma óptima
+import Script from "next/script";
 
 interface Armazon {
   id: string;
@@ -13,10 +15,14 @@ interface Armazon {
 }
 
 export default function AdminArmazonesPage() {
+  // --- CONFIGURACIÓN CLOUDINARY REAL YA CARGADA ---
+  const CLOUD_NAME = "dyskgncu8"; 
+  const UPLOAD_PRESET = "optica_danny"; 
+
   // --- ESTADOS DEL FORMULARIO Y LISTA ---
   const [nombre, setNombre] = useState("");
   const [precio, setPrecio] = useState("");
-  const [imagen, setImagen] = useState("");
+  const [imagen, setImagen] = useState(""); // Aquí se guardará automáticamente el link de Cloudinary
   const [stock, setStock] = useState("");
   const [descripcion, setDescripcion] = useState("");
   const [armazones, setArmazones] = useState<Armazon[]>([]);
@@ -32,7 +38,6 @@ export default function AdminArmazonesPage() {
   const [autorizado, setAutorizado] = useState(false);
   const [errorPin, setErrorPin] = useState("");
 
-  // Cargar la lista de armazones actuales
   const cargarLista = async () => {
     try {
       const res = await fetch("/api/armazones");
@@ -51,7 +56,6 @@ export default function AdminArmazonesPage() {
     }
   }, [autorizado]);
 
-  // Validar PIN de acceso
   const manejarLoginAdmin = (e: React.FormEvent) => {
     e.preventDefault();
     if (pinIngresado === "2026") { 
@@ -62,9 +66,57 @@ export default function AdminArmazonesPage() {
     }
   };
 
-  // Crear nuevo armazón
+  // LÓGICA LUXURY PARA ABRIR EL WIDGET DE CLOUDINARY
+  const abrirWidgetCloudinary = (esParaEdicion: boolean) => {
+    if (typeof window !== "undefined" && (window as any).cloudinary) {
+      const miWidget = (window as any).cloudinary.createUploadWidget(
+        {
+          cloudName: CLOUD_NAME,
+          uploadPreset: UPLOAD_PRESET,
+          sources: ["local", "url", "camera"], 
+          multiple: false, 
+          cropping: false, 
+          styles: {
+            palette: {
+              window: "#021120",
+              windowBorder: "#c5a059",
+              tabIcon: "#c5a059",
+              menuIcons: "#c5a059",
+              textDark: "#FFFFFF",
+              textLight: "#CCCCCC",
+              link: "#c5a059",
+              action: "#c5a059",
+              inactiveTabIcon: "#666666",
+              error: "#F43F5E",
+              inProgress: "#c5a059",
+              complete: "#10B981",
+              sourceBg: "#001529"
+            }
+          }
+        },
+        (error: any, result: any) => {
+          if (!error && result && result.event === "success") {
+            console.log("🔥 Foto subida con éxito a Cloudinary: ", result.info.secure_url);
+            if (esParaEdicion) {
+              setProductoAEditar((prev: any) => ({ ...prev, imagen: result.info.secure_url }));
+            } else {
+              setImagen(result.info.secure_url);
+            }
+          }
+        }
+      );
+      miWidget.open();
+    } else {
+      alert("El módulo de subida está cargando, aguantá un milisegundo y volvé a intentar.");
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!imagen) {
+      alert("Che, te olvidaste de subir la foto del armazón.");
+      return;
+    }
     setCargando(true);
     setMensaje("");
 
@@ -75,7 +127,7 @@ export default function AdminArmazonesPage() {
         body: JSON.stringify({
           nombre,
           precio: Number(precio),
-          imagen,
+          imagen, 
           stock: Number(stock) || 5, 
           descripcion: descripcion || ""
         }),
@@ -100,7 +152,6 @@ export default function AdminArmazonesPage() {
     }
   };
 
-  // Eliminar armazón
   const handleEliminar = async (id: string, nombreLente: string) => {
     const confirmar = confirm(`¿Seguro que querés eliminar "${nombreLente}" del catálogo?`);
     if (!confirmar) return;
@@ -124,7 +175,6 @@ export default function AdminArmazonesPage() {
     }
   };
 
-  // --- FLUJO PRE-LOGIN: FORMULARIO PIN ---
   if (!autorizado) {
     return (
       <div className="min-h-screen bg-[#001424] flex flex-col justify-center items-center text-white px-4">
@@ -157,7 +207,9 @@ export default function AdminArmazonesPage() {
   return (
     <div className="min-h-screen bg-[#000e1a] text-white relative selection:bg-[#c5a059] selection:text-black">
       
-      {/* Fondos Luxury */}
+      {/* Carga del script oficial del widget de Cloudinary */}
+      <Script src="https://upload-widget.cloudinary.com/global/all.js" strategy="lazyOnload" />
+
       <div className="fixed inset-0 z-0 bg-[radial-gradient(circle_at_top_left,_var(--tw-gradient-stops))] from-[#071f35] via-[#000e1a] to-[#000e1a]"></div>
 
       <header className="relative z-10 w-full max-w-7xl mx-auto px-6 py-6 border-b border-white/5 flex justify-between items-center bg-black/10 backdrop-blur-md">
@@ -202,9 +254,28 @@ export default function AdminArmazonesPage() {
               </div>
             </div>
 
+            {/* BOTÓN LUXURY DE SUBIDA CLOUDINARY */}
             <div className="space-y-1">
-              <label className="block text-[9px] uppercase tracking-widest text-neutral-400 font-bold">URL de la Imagen (PNG/WebP transparente)</label>
-              <input type="text" required value={imagen} onChange={(e) => setImagen(e.target.value)} placeholder="https://i.ibb.co/.../lente.png" className="w-full bg-[#001529] border border-white/10 rounded-xl p-3.5 text-xs text-white placeholder-neutral-700 outline-none focus:border-[#c5a059] transition-all" />
+              <label className="block text-[9px] uppercase tracking-widest text-neutral-400 font-bold">Imagen del Producto</label>
+              <div className="flex gap-3 items-center">
+                <button
+                  type="button"
+                  onClick={() => abrirWidgetCloudinary(false)}
+                  className="bg-[#001529] border border-[#c5a059]/30 hover:border-[#c5a059] text-white text-xs font-bold uppercase tracking-wider px-4 py-3 rounded-xl transition-all flex items-center gap-2"
+                >
+                  📸 {imagen ? "Cambiar Imagen" : "Subir Foto Real"}
+                </button>
+                {imagen && (
+                  <span className="text-[10px] text-emerald-400 font-bold uppercase tracking-wider flex items-center gap-1">
+                    ✓ Cargada con éxito
+                  </span>
+                )}
+              </div>
+              {imagen && (
+                <div className="mt-2 w-20 h-20 bg-black/40 border border-white/5 rounded-xl overflow-hidden p-1 flex items-center justify-center">
+                  <img src={imagen} alt="Preview" className="max-w-full max-h-full object-contain" />
+                </div>
+              )}
             </div>
 
             <div className="space-y-1">
@@ -224,7 +295,7 @@ export default function AdminArmazonesPage() {
           )}
         </div>
 
-        {/* LISTADO EN VIVO CON SOPORTE DE EDICIÓN (Derecha) */}
+        {/* LISTADO EN VIVO (Derecha) */}
         <div className="lg:col-span-7 bg-[#021120]/80 border border-white/5 rounded-3xl p-6 md:p-8 backdrop-blur-xl shadow-2xl space-y-6">
           <div>
             <span className="text-[9px] text-[#c5a059] font-black uppercase tracking-[0.4em] block mb-1">Live Feed</span>
@@ -255,9 +326,7 @@ export default function AdminArmazonesPage() {
                       </div>
                     </div>
                     
-                    {/* ACCIONES DE FILA */}
                     <div className="flex gap-2">
-                      {/* 🔥 BOTÓN EDITAR */}
                       <button 
                         onClick={() => setProductoAEditar(item)}
                         className="p-2 rounded-lg bg-[#c5a059]/10 border border-[#c5a059]/20 text-[#c5a059] hover:bg-[#c5a059] hover:text-black transition-all text-xs font-bold"
@@ -266,7 +335,6 @@ export default function AdminArmazonesPage() {
                         ✏️
                       </button>
                       
-                      {/* BOTÓN ELIMINAR */}
                       <button 
                         onClick={() => handleEliminar(item.id, item.nombre)} 
                         className="p-2 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-400 hover:bg-rose-500 hover:text-white transition-all text-xs font-bold"
@@ -283,9 +351,9 @@ export default function AdminArmazonesPage() {
         </div>
       </main>
 
-      {/* 🏛️ MODAL LUXURY PARA EDITAR ARMAZÓN */}
+      {/* MODAL LUXURY PARA EDITAR ARMAZÓN */}
       {productoAEditar && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
           <div className="relative w-full max-w-lg bg-[#021120] border border-white/10 p-6 md:p-8 rounded-3xl shadow-2xl space-y-6 text-white">
             
             <button 
@@ -306,7 +374,6 @@ export default function AdminArmazonesPage() {
                 e.preventDefault();
                 setGuardandoCambios(true);
                 try {
-                  // 🔥 ACTUALIZADO: Apuntamos directo a la API limpia pasándole todo por body
                   const res = await fetch("/api/armazones", {
                     method: "PUT",
                     headers: { "Content-Type": "application/json" },
@@ -315,7 +382,8 @@ export default function AdminArmazonesPage() {
                       nombre: productoAEditar.nombre,
                       precio: Number(productoAEditar.precio),
                       stock: Number(productoAEditar.stock),
-                      descripcion: productoAEditar.descripcion
+                      descripcion: productoAEditar.descripcion,
+                      imagen: productoAEditar.imagen 
                     })
                   });
                   if (res.ok) {
@@ -328,12 +396,12 @@ export default function AdminArmazonesPage() {
                   console.error(err);
                   alert("Error de red al actualizar.");
                 } finally {
+                  // 👇 CORREGIDO: doble 'll' para evitar el SyntaxError
                   setGuardandoCambios(false);
                 }
               }} 
               className="space-y-4"
             >
-              {/* Campo Nombre */}
               <div className="space-y-1">
                 <label className="block text-[9px] uppercase tracking-widest text-neutral-400 font-bold">Nombre del Modelo</label>
                 <input 
@@ -346,7 +414,6 @@ export default function AdminArmazonesPage() {
               </div>
 
               <div className="grid grid-cols-2 gap-4">
-                {/* Campo Precio */}
                 <div className="space-y-1">
                   <label className="block text-[9px] uppercase tracking-widest text-neutral-400 font-bold">Precio ($ MXN)</label>
                   <input 
@@ -355,10 +422,9 @@ export default function AdminArmazonesPage() {
                     value={productoAEditar.precio}
                     onChange={(e) => setProductoAEditar({...productoAEditar, precio: Number(e.target.value)})}
                     className="w-full bg-[#001529] border border-white/10 rounded-xl p-3 text-xs text-white outline-none focus:border-[#c5a059] transition-all" 
-                />
+                  />
                 </div>
 
-                {/* Campo Stock */}
                 <div className="space-y-1">
                   <label className="block text-[9px] uppercase tracking-widest text-neutral-400 font-bold">Stock Físico</label>
                   <input 
@@ -371,7 +437,23 @@ export default function AdminArmazonesPage() {
                 </div>
               </div>
 
-              {/* Campo Descripción */}
+              {/* EDICIÓN EXTRA: CLOUDINARY ADENTRO DEL MODAL */}
+              <div className="space-y-1">
+                <label className="block text-[9px] uppercase tracking-widest text-neutral-400 font-bold">Imagen del Producto</label>
+                <div className="flex gap-3 items-center">
+                  <button
+                    type="button"
+                    onClick={() => abrirWidgetCloudinary(true)}
+                    className="bg-[#001529] border border-[#c5a059]/30 hover:border-[#c5a059] text-white text-[11px] font-bold uppercase tracking-wider px-3 py-2 rounded-xl transition-all"
+                  >
+                    🔄 Reemplazar Foto
+                  </button>
+                  <div className="w-12 h-12 bg-black/40 border border-white/5 rounded-xl overflow-hidden p-1 flex items-center justify-center ml-auto">
+                    <img src={productoAEditar.imagen} alt="Mini Preview" className="max-w-full max-h-full object-contain" />
+                  </div>
+                </div>
+              </div>
+
               <div className="space-y-1">
                 <label className="block text-[9px] uppercase tracking-widest text-neutral-400 font-bold">Descripción Corta</label>
                 <textarea 
