@@ -17,11 +17,6 @@ import { useMaintenance } from '../lib/maintenance';
 
 import { obtenerArmazones, Armazon } from '../lib/armazones';
 
-interface ArmazonExtendida extends Armazon {
-  genero?: string;
-  tipo?: string;
-}
-
 export default function Home() {
   const {
     isMaintenanceConfigured,
@@ -29,23 +24,10 @@ export default function Home() {
     isPreviewUnlocked,
     unlockPreview,
     lockPreview,
-    checking,
   } = useMaintenance();
 
-  const [armazones, setArmazones] = useState<ArmazonExtendida[]>([]);
+  const [armazones, setArmazones] = useState<Armazon[]>([]);
   const [cargando, setCargando] = useState(true);
-
-  // --- ESTADOS DE FILTRADO AVANZADO ---
-  const [busqueda, setBusqueda] = useState("");
-  const [tipoActivo, setTipoActivo] = useState("todos"); // todos, oftalmicos, sol, inteligentes
-  const [generoActivo, setGeneroActivo] = useState("todos"); // todos, hombre, mujer, unisex
-  const [precioMaximo, setPrecioMaximo] = useState<number>(12000); // Rango de precio
-  
-  // 🔥 NUEVO ESTADO: Controla si se ocultan los lentes sin stock
-  const [soloDisponibles, setSoloDisponibles] = useState(false);
-
-  // --- ESTADO DE PAGINACIÓN ---
-  const [limiteVisible, setLimiteVisible] = useState(12); //
 
   useEffect(() => {
     async function cargarDatos() {
@@ -60,83 +42,6 @@ export default function Home() {
     }
     cargarDatos();
   }, []);
-
-  // --- MOTOR DE FILTRADO INTELIGENTE COMBINADO MÁS STOCK ---
-  const armazonesFiltrados = armazones.filter((item) => {
-    const nombreLower = item.nombre.toLowerCase();
-    const descLower = (item.descripcion || "").toLowerCase();
-    const categoria = (item.categoria || "").toLowerCase();
-    const genero = (item.genero || "").toLowerCase();
-    const marca = (item.marca || "").toLowerCase();
-
-    // 1. Filtro por Buscador de Texto (nombre, descripción o marca)
-    const query = busqueda.toLowerCase().trim();
-    const coincideTexto =
-      !query ||
-      nombreLower.includes(query) ||
-      descLower.includes(query) ||
-      marca.includes(query);
-
-    // 2. Filtro por Precio Máximo
-    const coincidePrecio = item.precio <= precioMaximo;
-
-    // 3. Filtro por Tipo de Lente (propiedad estructurada con fallback para compatibilidad)
-    let coincideTipo = true;
-    if (tipoActivo === "sol") {
-      coincideTipo =
-        categoria === "sol" ||
-        nombreLower.includes("sol") ||
-        descLower.includes("sol");
-    } else if (tipoActivo === "inteligentes") {
-      coincideTipo =
-        categoria === "inteligente" ||
-        categoria === "smart" ||
-        nombreLower.includes("smart") ||
-        nombreLower.includes("inteligente") ||
-        descLower.includes("smart") ||
-        descLower.includes("meta");
-    } else if (tipoActivo === "oftalmicos") {
-      coincideTipo =
-        categoria === "oftalmico" ||
-        (!nombreLower.includes("sol") &&
-          !descLower.includes("sol") &&
-          !nombreLower.includes("smart"));
-    }
-
-    // 4. Filtro por Género / Sexo
-    let coincideGenero = true;
-    if (generoActivo === "hombre") {
-      coincideGenero =
-        genero === "hombre" ||
-        nombreLower.includes("hombre") ||
-        descLower.includes("hombre") ||
-        descLower.includes("masculino");
-    } else if (generoActivo === "mujer") {
-      coincideGenero =
-        genero === "mujer" ||
-        nombreLower.includes("mujer") ||
-        descLower.includes("mujer") ||
-        descLower.includes("femenino") ||
-        nombreLower.includes("dama");
-    } else if (generoActivo === "unisex") {
-      coincideGenero =
-        genero === "unisex" ||
-        nombreLower.includes("unisex") ||
-        (!nombreLower.includes("hombre") && !descLower.includes("mujer"));
-    }
-
-    // 5. Filtro de Disponibilidad de Stock real
-    const coincideStock = !soloDisponibles || (item.stock && item.stock > 0);
-
-    return coincideTexto && coincidePrecio && coincideTipo && coincideGenero && coincideStock;
-  });
-
-  const armazonesVisibles = armazonesFiltrados.slice(0, limiteVisible); //
-
-  // Reseteamos la paginación si se toca cualquier filtro, incluido el de stock
-  useEffect(() => {
-    setLimiteVisible(12); //
-  }, [busqueda, tipoActivo, generoActivo, precioMaximo, soloDisponibles]);
 
   // Si el modo construcción está activo y el usuario no ha desbloqueado la vista previa
   if (isBlocked) {
@@ -180,135 +85,10 @@ export default function Home() {
 
         <div className="max-w-7xl mx-auto px-6 space-y-24 pb-40 pt-20">
           
-          {/* PANEL DE HIPER-FILTRADO AVANZADO */}
+          {/* CATÁLOGO E INVENTARIO MAESTRO DE ARMAZONES */}
           <FadeIn>
-            <section id="marcos" className="space-y-10 scroll-mt-24">
-              
-              <div className="bg-[#021120]/90 border border-white/5 rounded-3xl p-6 md:p-8 backdrop-blur-xl shadow-2xl max-w-5xl mx-auto w-full space-y-6">
-                <div className="border-b border-white/5 pb-3 flex flex-col sm:flex-row justify-between sm:items-center gap-2">
-                  <div>
-                    <span className="text-[9px] text-[#c5a059] font-black uppercase tracking-[0.4em] block mb-1">Advanced Search</span>
-                    <h2 className="text-lg font-black uppercase tracking-wide text-white">Filtrar Colección</h2>
-                  </div>
-                  
-                  {/* 🔥 NUEVO: Botón switch de disponibilidad con estilo luxury */}
-                  <button
-                    type="button"
-                    onClick={() => setSoloDisponibles(!soloDisponibles)}
-                    className={`px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest border transition-all self-start sm:self-center ${
-                      soloDisponibles 
-                        ? "bg-emerald-500/10 border-emerald-500/40 text-emerald-400 shadow-lg shadow-emerald-500/5" 
-                        : "bg-black/20 border-white/5 text-neutral-400 hover:text-white"
-                    }`}
-                  >
-                    {soloDisponibles ? "⚡ Mostrando Solo Disponibles" : "👁️ Mostrar Sin Stock"}
-                  </button>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  {/* Columna 1: Buscador de texto libre */}
-                  <div className="space-y-2">
-                    <label className="block text-[10px] uppercase tracking-widest text-neutral-400 font-bold">Palabra clave</label>
-                    <div className="relative">
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 opacity-40 text-xs">🔍</span>
-                      <input 
-                        type="text"
-                        value={busqueda}
-                        onChange={(e) => setBusqueda(e.target.value)}
-                        placeholder="Ej: Ray-Ban, Acetato, Aviador..."
-                        className="w-full bg-[#001529] border border-white/10 rounded-xl py-3 pl-9 pr-4 text-xs font-medium placeholder-neutral-600 focus:border-[#c5a059] outline-none transition-all"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Columna 2: Selector de Categorías / Tipo */}
-                  <div className="space-y-2">
-                    <label className="block text-[10px] uppercase tracking-widest text-neutral-400 font-bold">Tipo de Armazón</label>
-                    <div className="grid grid-cols-2 gap-1.5">
-                      {[
-                        { id: "todos", label: "Todos" },
-                        { id: "oftalmicos", label: "Oftálmicos" },
-                        { id: "sol", label: "De Sol" },
-                        { id: "inteligentes", label: "Smart" }
-                      ].map((t) => (
-                        <button
-                          key={t.id}
-                          type="button"
-                          onClick={() => setTipoActivo(t.id)}
-                          className={`py-2 text-[9px] font-black uppercase tracking-widest rounded-lg border transition-all ${
-                            tipoActivo === t.id 
-                              ? "bg-[#c5a059] border-[#c5a059] text-black" 
-                              : "bg-black/20 border-white/5 text-neutral-400 hover:text-white"
-                          }`}
-                        >
-                          {t.label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Columna 3: Selector de Género / Sexo */}
-                  <div className="space-y-2">
-                    <label className="block text-[10px] uppercase tracking-widest text-neutral-400 font-bold">Estilo / Género</label>
-                    <div className="grid grid-cols-2 gap-1.5">
-                      {[
-                        { id: "todos", label: "Universo" },
-                        { id: "hombre", label: "Hombre" },
-                        { id: "mujer", label: "Mujer" },
-                        { id: "unisex", label: "Unisex" }
-                      ].map((g) => (
-                        <button
-                          key={g.id}
-                          type="button"
-                          onClick={() => setGeneroActivo(g.id)}
-                          className={`py-2 text-[9px] font-black uppercase tracking-widest rounded-lg border transition-all ${
-                            generoActivo === g.id 
-                              ? "bg-[#c5a059] border-[#c5a059] text-black" 
-                              : "bg-black/20 border-white/5 text-neutral-400 hover:text-white"
-                          }`}
-                        >
-                          {g.label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Filtro de Rango de Precio inferior sutil */}
-                <div className="pt-2 flex flex-col md:flex-row md:items-center justify-between gap-4 border-t border-white/5 text-xs text-neutral-400 font-medium">
-                  <div className="flex items-center gap-2 w-full md:w-96">
-                    <span className="uppercase tracking-widest text-[10px] font-bold shrink-0">Precio máx:</span>
-                    <input 
-                      type="range" 
-                      min="500" 
-                      max="15000" 
-                      step="500"
-                      value={precioMaximo}
-                      onChange={(e) => setPrecioMaximo(Number(e.target.value))}
-                      className="w-full h-1 bg-[#001529] accent-[#c5a059] rounded-lg appearance-none cursor-pointer border border-white/5"
-                    />
-                    <span className="text-[#c5a059] font-black text-xs shrink-0">${precioMaximo.toLocaleString("es-MX")} MXN</span>
-                  </div>
-                  <div className="text-[10px] uppercase tracking-widest font-bold text-neutral-500">
-                    Modelos encontrados: <span className="text-white">{armazonesFiltrados.length}</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* GALERÍA DINÁMICA */}
-              <Gallery armazones={armazonesVisibles} cargando={cargando} />
-
-              {/* BOTÓN DE CARGAR MÁS */}
-              {!cargando && armazonesFiltrados.length > limiteVisible && (
-                <div className="text-center pt-6">
-                  <button
-                    onClick={() => setLimiteVisible((prev) => prev + 12)}
-                    className="text-[10px] font-black uppercase tracking-[0.2em] border border-[#c5a059]/30 hover:border-[#c5a059] text-[#c5a059] hover:bg-[#c5a059] hover:text-black px-8 py-3.5 rounded-full transition-all shadow-lg shadow-[#c5a059]/5 active:scale-[0.98]"
-                  >
-                    Cargar más modelos
-                  </button>
-                </div>
-              )}
+            <section id="marcos" className="scroll-mt-24">
+              <Gallery armazones={armazones} cargando={cargando} />
             </section>
           </FadeIn>
           
