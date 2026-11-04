@@ -58,18 +58,10 @@ export default function ComingSoon({ onUnlockPreview }: ComingSoonProps) {
       <header className="relative z-10 w-full max-w-7xl mx-auto px-6 py-6 md:py-8 flex justify-between items-center border-b border-white/5">
         <div className="flex items-center gap-3">
           <img 
-            src="/ojo_danny_dorado.png" 
+            src="/logo_danny_trim.png" 
             alt="Logo Óptica Danny" 
-            className="w-8 h-8 object-contain drop-shadow-[0_0_10px_rgba(197,160,89,0.5)]" 
+            className="h-9 md:h-11 w-auto object-contain drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)]" 
           />
-          <div className="flex flex-col">
-            <span className="text-white font-black tracking-[0.3em] text-xs md:text-sm uppercase leading-tight">
-              ÓPTICA DANNY
-            </span>
-            <span className="text-[9px] text-[#c5a059] font-medium tracking-wider">
-              Mérida, Yucatán
-            </span>
-          </div>
         </div>
 
         <a
@@ -115,17 +107,11 @@ export default function ComingSoon({ onUnlockPreview }: ComingSoonProps) {
             }}
             className="relative z-10 flex flex-col items-center cursor-default"
           >
-            {/* OJO OFICIAL */}
-            <img
-              src="/ojo_danny_dorado.png"
-              alt="Logo Óptica Danny"
-              className="w-24 md:w-32 h-auto object-contain mb-3 drop-shadow-[0_0_30px_rgba(197,160,89,0.6)]"
-            />
-            {/* TIPOGRAFÍA OFICIAL */}
+            {/* LOGO OFICIAL EN BREATHE LOOP */}
             <img
               src="/logodannyblanco.png"
               alt="Óptica Danny"
-              className="w-56 md:w-80 h-auto object-contain drop-shadow-[0_15px_35px_rgba(0,0,0,0.8)]"
+              className="w-64 md:w-96 h-auto object-contain drop-shadow-[0_15px_35px_rgba(0,0,0,0.8)]"
             />
           </motion.div>
         </div>

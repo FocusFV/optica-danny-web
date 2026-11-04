@@ -35,27 +35,15 @@ export default function Hero() {
                 className="absolute inset-0 bg-[#c5a059]/15 blur-[120px] rounded-full z-0"
               />
               
-              <motion.div
+              <motion.img 
+                src="/logodannyblanco.png" 
+                alt="Óptica Danny" 
                 animate={{
                   y: [0, -10, 0],
                 }}
                 transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                className="relative z-10 flex flex-col items-center justify-center w-full"
-              >
-                {/* ISOTIPO OJO OFICIAL */}
-                <img 
-                  src="/ojo_danny_dorado.png" 
-                  alt="Logo Óptica Danny" 
-                  className="w-20 sm:w-28 md:w-36 h-auto object-contain mb-3 md:mb-5 drop-shadow-[0_0_35px_rgba(197,160,89,0.6)]"
-                />
-
-                {/* TIPOGRAFÍA ÓPTICA DANNY */}
-                <img 
-                  src="/logodannyblanco.png" 
-                  alt="Óptica Danny" 
-                  className="w-full max-w-[480px] md:max-w-[620px] h-auto object-contain drop-shadow-[0_0_50px_rgba(0,0,0,0.5)]"
-                />
-              </motion.div>
+                className="relative z-10 w-full max-w-[550px] md:max-w-[700px] h-auto object-contain drop-shadow-[0_0_50px_rgba(0,0,0,0.5)]"
+              />
 
               <motion.div className="mt-6 md:mt-8 text-center relative z-20">
                 <h2 className="texto-gradient-gold text-xs md:text-lg tracking-[0.6em] md:tracking-[0.8em] uppercase font-bold opacity-90">

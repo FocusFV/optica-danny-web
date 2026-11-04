@@ -41,21 +41,13 @@ export default function Navbar() {
     >
       <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
         
-        {/* LOGO LUXURY CON OJO OFICIAL */}
-        <Link href="/" className="flex items-center gap-2.5 group">
+        {/* LOGO OFICIAL ÓPTICA DANNY */}
+        <Link href="/" className="flex items-center group py-1">
           <img 
-            src="/ojo_danny_dorado.png" 
-            alt="Logo Óptica Danny" 
-            className="w-7 h-7 md:w-8 md:h-8 object-contain drop-shadow-[0_0_10px_rgba(197,160,89,0.5)] group-hover:scale-105 transition-transform" 
+            src="/logo_danny_trim.png" 
+            alt="Óptica Danny" 
+            className="h-9 md:h-11 w-auto object-contain transition-transform duration-300 group-hover:scale-105 drop-shadow-[0_2px_12px_rgba(0,0,0,0.5)]" 
           />
-          <div className="flex flex-col">
-            <span className="text-white font-black tracking-[0.3em] text-xs md:text-sm group-hover:text-[#c5a059] transition-colors leading-tight">
-              ÓPTICA DANNY
-            </span>
-            <span className="text-[8px] text-[#c5a059] uppercase tracking-[0.2em] font-bold">
-              Mérida, Yucatán
-            </span>
-          </div>
         </Link>
 
         {/* MENÚ DESKTOP CON EFECTO INTERACTIVO */}
