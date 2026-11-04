@@ -24,11 +24,11 @@ export default function Navbar() {
     { name: "Inicio", href: "#" },
     { name: "Servicios", href: "#servicios" },
     { name: "Modelos", href: "#marcos" },
-    { name: "Ubicación", href: "#contacto" },
+    { name: "Contacto", href: "#contacto" },
   ];
 
-  const linkAgendarCita = buildWhatsAppLink(
-    "¡Hola Óptica Danny! 👋 Quisiera agendar una cita para un examen de la vista en Mérida."
+  const linkConsulta = buildWhatsAppLink(
+    "¡Hola Óptica Danny! 👋 Quisiera consultar por armazones y modelos de lentes en Mérida."
   );
 
   return (
@@ -41,14 +41,21 @@ export default function Navbar() {
     >
       <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
         
-        {/* LOGO LUXURY */}
-        <Link href="/" className="flex flex-col group">
-          <span className="text-white font-black tracking-[0.4em] text-sm md:text-base group-hover:text-[#c5a059] transition-colors">
-            ÓPTICA DANNY
-          </span>
-          <span className="text-[8px] text-[#c5a059] uppercase tracking-[0.3em] font-bold mt-0.5">
-            Alta Gama Visual
-          </span>
+        {/* LOGO LUXURY CON OJO OFICIAL */}
+        <Link href="/" className="flex items-center gap-2.5 group">
+          <img 
+            src="/ojo_danny_dorado.png" 
+            alt="Logo Óptica Danny" 
+            className="w-7 h-7 md:w-8 md:h-8 object-contain drop-shadow-[0_0_10px_rgba(197,160,89,0.5)] group-hover:scale-105 transition-transform" 
+          />
+          <div className="flex flex-col">
+            <span className="text-white font-black tracking-[0.3em] text-xs md:text-sm group-hover:text-[#c5a059] transition-colors leading-tight">
+              ÓPTICA DANNY
+            </span>
+            <span className="text-[8px] text-[#c5a059] uppercase tracking-[0.2em] font-bold">
+              Mérida, Yucatán
+            </span>
+          </div>
         </Link>
 
         {/* MENÚ DESKTOP CON EFECTO INTERACTIVO */}
@@ -83,14 +90,14 @@ export default function Navbar() {
             )}
           </button>
 
-          {/* BOTÓN AGENDAR CITA CON WHATSAPP OFICIAL */}
+          {/* BOTÓN WHATSAPP OFICIAL */}
           <a 
-            href={linkAgendarCita}
+            href={linkConsulta}
             target="_blank"
             rel="noopener noreferrer"
-            className="hidden sm:inline-block px-6 py-3 bg-transparent border border-[#c5a059] text-[#c5a059] text-[10px] uppercase tracking-[0.3em] font-black rounded-full hover:bg-[#c5a059] hover:text-black transition-all duration-500 shadow-[0_0_15px_rgba(197,160,89,0.1)] active:scale-95"
+            className="hidden sm:inline-block px-5 py-2.5 bg-transparent border border-[#c5a059] text-[#c5a059] text-[10px] uppercase tracking-[0.25em] font-black rounded-full hover:bg-[#c5a059] hover:text-black transition-all duration-300 shadow-[0_0_15px_rgba(197,160,89,0.1)] active:scale-95"
           >
-            Agendar Cita
+            Escribinos
           </a>
 
           {/* MENÚ MÓVIL HAMBURGUESA */}
@@ -126,13 +133,13 @@ export default function Navbar() {
                 </a>
               ))}
               <a 
-                href={linkAgendarCita}
+                href={linkConsulta}
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => setIsMobileMenuOpen(false)}
                 className="mt-2 w-full max-w-xs text-center px-8 py-3.5 bg-[#c5a059] text-black text-[11px] uppercase tracking-[0.3em] font-black rounded-full shadow-xl hover:bg-[#dfba75] transition-all"
               >
-                Agendar Cita
+                Escribinos por WhatsApp
               </a>
             </div>
           </motion.div>

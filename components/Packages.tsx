@@ -10,38 +10,38 @@ import { BUSINESS_INFO, buildWhatsAppLink } from '@/lib/constants';
 const packages = [
   {
     id: 1,
-    name: "Examen de la Vista",
+    name: "Lentes con tu Receta",
     icon: Eye,
     features: [
-      "Evaluación computarizada",
-      "Prueba de agudeza visual",
-      "Diagnóstico profesional"
+      "Cotización con tu receta médica",
+      "Antirreflejante y filtro Blue Block",
+      "Laboratorio óptico garantizado"
     ],
-    price: "Gratis c/ compra",
+    price: "Cotización sin cargo",
     recommended: false
   },
   {
     id: 2,
-    name: "Armazones Premium",
+    name: "Armazones Seleccionados",
     icon: Sparkles,
     features: [
-      "Marcas internacionales",
-      "Garantía de 1 año",
-      "Ajuste personalizado"
+      "Modelos oftálmicos y de sol",
+      "Materiales cómodos y resistentes",
+      "Fotos reales de cada modelo"
     ],
-    price: "Desde $1200 MXN",
+    price: "Modelos para todos los gustos",
     recommended: true
   },
   {
     id: 3,
-    name: "Lentes de Contacto",
+    name: "Atención y Entrega",
     icon: Zap,
     features: [
-      "Marcas: Acuvue, Biofinity",
-      "Líquido de limpieza incluido",
-      "Prueba de adaptación"
+      "Asesoramiento directo por WhatsApp",
+      "Entregas en Mérida acordadas",
+      "Listos para usar y garantizados"
     ],
-    price: "Desde $850 MXN",
+    price: "Atención personalizada",
     recommended: false
   }
 ];
@@ -70,10 +70,10 @@ export default function Packages() {
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-20">
           <h2 className="text-3xl md:text-5xl font-black tracking-tighter text-white uppercase mb-4">
-            Nuestros <span className="text-[#c5a059]">Servicios</span>
+            Cómo <span className="text-[#c5a059]">Trabajamos</span>
           </h2>
           <p className="text-gray-400 text-[10px] tracking-[0.4em] uppercase font-light">
-            Soluciones visuales con tecnología y estilo
+            Elegís tu armazón, nos mandás tu receta y te los entregamos en Mérida
           </p>
         </div>
 

@@ -11,19 +11,19 @@ export default function Creators() {
   const team = [
     {
       name: "Diana Sánchez",
-      role: "Especialista en Optometría",
-      bio: "Experta en diagnóstico refractivo avanzado y salud ocular integral.",
-      fullBio: "Con una trayectoria sólida en el cuidado de la visión, Diana combina el rigor clínico con una sensibilidad estética única. Su especialidad radica en la detección precisa de anomalías refractivas y la prescripción personalizada, asegurando que cada paciente reciba una solución técnica exacta y cómoda. Es la responsable de garantizar la excelencia clínica en cada consulta en Mérida.",
+      role: "Asesoramiento Óptico y Lentes",
+      bio: "Te ayuda a elegir el armazón ideal y entender tu receta médica.",
+      fullBio: "Diana se dedica a acompañarte para que tus lentes no solo se vean bien, sino que se sientan cómodos y tengan la graduación exacta según tu receta. Te orienta sobre los mejores tipos de cristales (antirreflejantes, descanso, filtro azul) y qué formato de armazón armoniza mejor con las facciones de tu rostro.",
       image: "https://i.imgur.com/OzSxH8T.png", 
-      highlights: ["Examen Computarizado", "Adaptación de Lentes", "Salud Ocular"]
+      highlights: ["Lentes con Receta", "Asesoría de Estilo", "Cuidado Visual"]
     },
     {
       name: "Fede Villalba",
-      role: "Gestión y Estrategia Digital",
-      bio: "Responsable de la infraestructura tecnológica y optimización operativa.",
-      fullBio: "Fede es el motor detrás de la innovación en Óptica Danny. Encargado del desarrollo de soluciones digitales a medida, su trabajo asegura que la gestión del local y la experiencia del cliente sean fluidas y modernas. Desde la implementación de sistemas internos hasta la presencia web, su enfoque es utilizar la tecnología para potenciar el servicio de salud visual.",
+      role: "Tienda Online y Logística",
+      bio: "Coordinación de pedidos, catálogo digital y entregas en Mérida.",
+      fullBio: "Fede se encarga de que la experiencia de elegir tus lentes sea simple y transparente: desde el catálogo con fotos reales hasta la coordinación de entregas rápidas y seguras en Mérida. Siempre disponible para que tu pedido llegue a tiempo y sin complicaciones.",
       image: "https://i.imgur.com/T7gyife.png", 
-      highlights: ["Desarrollo de Sistemas", "Optimización de Procesos", "Transformación Digital"]
+      highlights: ["Atención Directa", "Entregas en Mérida", "Catálogo Digital"]
     }
   ];
 

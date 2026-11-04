@@ -48,7 +48,7 @@ export default function Footer() {
               <a href="#marcos" className="hover:text-white transition-colors">Colección</a>
               <a href="#servicios" className="hover:text-white transition-colors">Servicios</a>
               <a href="#equipo" className="hover:text-white transition-colors">Especialistas</a>
-              <a href="#contacto" className="hover:text-white transition-colors">Ubicación</a>
+              <a href="#contacto" className="hover:text-white transition-colors">Contacto</a>
             </div>
           </div>
 

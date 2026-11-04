@@ -10,24 +10,23 @@ import { BUSINESS_INFO } from "@/lib/constants";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: `${BUSINESS_INFO.name} — Luxury Eyewear & Alta Gama Visual`,
+  title: `${BUSINESS_INFO.name} — Armazones y Lentes en Mérida`,
   description:
-    "Óptica Danny en Mérida, Yucatán. Armazones exclusivos, marcas internacionales, examen de la vista computarizado y tecnología de vanguardia para tu mirada.",
+    "Óptica Danny en Mérida, Yucatán. Armazones seleccionados, cristales adaptados a tu receta médica y atención personalizada con entregas en Mérida.",
   keywords: [
     "Óptica Danny",
     "Lentes Mérida",
     "Armazones Mérida",
-    "Examen de la vista Mérida",
-    "Lentes de Sol",
+    "Lentes con receta Mérida",
+    "Lentes de Sol Mérida",
     "Ray-Ban Mérida",
-    "Oakley",
-    "Alta Gama Visual",
+    "Óptica a domicilio Mérida",
   ],
   authors: [{ name: "Óptica Danny" }],
   openGraph: {
-    title: `${BUSINESS_INFO.name} — Alta Gama Visual en Mérida`,
+    title: `${BUSINESS_INFO.name} — Armazones y Lentes en Mérida`,
     description:
-      "Descubrí tu estilo con nuestra colección exclusiva de armazones oftálmicos, de sol y smart glasses.",
+      "Elegí tus armazones, mandanos tu receta médica y te entregamos tus lentes listos para usar en Mérida.",
     locale: "es_MX",
     type: "website",
   },

@@ -22,7 +22,7 @@ export default function Contact() {
   };
 
   const linkWhatsAppDirecto = buildWhatsAppLink(
-    `¡Hola ${BUSINESS_INFO.name}! 👋 Quiero consultar por disponibilidad y turnos en Mérida.`
+    `¡Hola ${BUSINESS_INFO.name}! 👋 Quiero consultar por modelos de lentes y cómo hacer un pedido en Mérida.`
   );
 
   return (
@@ -35,28 +35,27 @@ export default function Contact() {
           
           {/* Columna Izquierda: Info de Contacto */}
           <div className="text-left">
-            <h2 className="text-[#c5a059] font-bold uppercase tracking-[0.5em] text-[10px] mb-4">Ubicación y contacto</h2>
-            <h3 className="text-5xl md:text-7xl font-black text-white tracking-tighter uppercase mb-8 leading-tight">
-              VISITANOS <br /> EN EL <span className="text-[#c5a059]">LOCAL</span>
+            <h2 className="text-[#c5a059] font-bold uppercase tracking-[0.5em] text-[10px] mb-4">Atención y Entregas</h2>
+            <h3 className="text-5xl md:text-7xl font-black text-white tracking-tighter uppercase mb-6 leading-tight">
+              PEDÍ TUS LENTES <br /> EN <span className="text-[#c5a059]">MÉRIDA</span>
             </h3>
+
+            <p className="text-neutral-400 text-sm font-light leading-relaxed mb-10 max-w-md">
+              Elegí tus armazones, mandanos tu receta médica por WhatsApp y coordinamos la entrega de tus lentes listos en el punto de Mérida que te quede más cómodo.
+            </p>
             
-            <div className="space-y-8 mt-12">
-              <a 
-                href={BUSINESS_INFO.mapsUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-6 group cursor-pointer"
-              >
-                <div className="p-4 bg-white/5 rounded-2xl border border-white/10 group-hover:border-[#c5a059]/50 transition-colors">
+            <div className="space-y-6">
+              <div className="flex items-center gap-6">
+                <div className="p-4 bg-white/5 rounded-2xl border border-white/10">
                   <MapPin className="text-[#c5a059]" size={24} />
                 </div>
                 <div>
-                  <p className="text-[10px] uppercase tracking-widest text-gray-500 mb-1">Dirección</p>
-                  <p className="text-white text-lg font-light tracking-wide group-hover:text-[#c5a059] transition-colors">
-                    {BUSINESS_INFO.address}
+                  <p className="text-[10px] uppercase tracking-widest text-gray-500 mb-1">Zona de Cobertura</p>
+                  <p className="text-white text-base font-light tracking-wide">
+                    Mérida, Yucatán (Entregas personales y envíos)
                   </p>
                 </div>
-              </a>
+              </div>
 
               <a
                 href={linkWhatsAppDirecto}
@@ -68,23 +67,23 @@ export default function Contact() {
                   <Phone className="text-[#c5a059]" size={24} />
                 </div>
                 <div>
-                  <p className="text-[10px] uppercase tracking-widest text-gray-500 mb-1">WhatsApp Oficial</p>
-                  <p className="text-white text-lg font-light tracking-wide group-hover:text-[#c5a059] transition-colors">
+                  <p className="text-[10px] uppercase tracking-widest text-gray-500 mb-1">WhatsApp de Atención</p>
+                  <p className="text-white text-base font-light tracking-wide group-hover:text-[#c5a059] transition-colors">
                     {BUSINESS_INFO.whatsappDisplay}
                   </p>
                 </div>
               </a>
             </div>
 
-            <div className="mt-12">
+            <div className="mt-10">
               <a 
-                href={BUSINESS_INFO.mapsUrl}
+                href={linkWhatsAppDirecto}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-3 px-8 py-4 bg-[#c5a059] text-black text-[10px] font-black uppercase tracking-[0.3em] rounded-xl hover:bg-white transition-all shadow-[0_10px_20px_rgba(197,160,89,0.2)]"
+                className="inline-flex items-center gap-3 px-8 py-4 bg-[#c5a059] text-black text-[10px] font-black uppercase tracking-[0.3em] rounded-xl hover:bg-[#dfba75] transition-all shadow-[0_10px_20px_rgba(197,160,89,0.2)] active:scale-95"
               >
-                <Navigation size={16} />
-                Cómo llegar con Maps
+                <Send size={15} />
+                Consultar por WhatsApp
               </a>
             </div>
           </div>
@@ -112,7 +111,7 @@ export default function Contact() {
                   required
                   value={consulta}
                   onChange={(e) => setConsulta(e.target.value)}
-                  placeholder="¿Tienen stock de armazones Ray-Ban? ¿Hacen examen de la vista los sábados?..."
+                  placeholder="Ej: ¿Tienen disponibilidad de este modelo? ¿Puedo pedir con antirreflejante y mi graduación?..."
                   className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white text-sm focus:border-[#c5a059] outline-none transition-all resize-none placeholder-neutral-600"
                 ></textarea>
               </div>
