@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
-import { FaInstagram, FaWhatsapp, FaMapMarkerAlt } from 'react-icons/fa';
+import React, { useEffect, useState } from "react";
+import { FaInstagram, FaWhatsapp, FaMapMarkerAlt } from "react-icons/fa";
+import { BUSINESS_INFO, buildWhatsAppLink } from "@/lib/constants";
 
 export default function Footer() {
   const [mounted, setMounted] = useState(false);
@@ -15,8 +16,8 @@ export default function Footer() {
 
   const formatTime = (offset: number) => {
     const d = new Date(time.getTime() + (time.getTimezoneOffset() * 60000) + (offset * 3600000));
-    return d.getHours().toString().padStart(2, '0') + ":" + 
-           d.getMinutes().toString().padStart(2, '0');
+    return d.getHours().toString().padStart(2, "0") + ":" + 
+           d.getMinutes().toString().padStart(2, "0");
   };
 
   if (!mounted) return null;
@@ -34,8 +35,8 @@ export default function Footer() {
             <h4 className="text-2xl font-black text-white tracking-tighter uppercase">
               ÓPTICA <span className="text-[#c5a059]">DANNY</span>
             </h4>
-            <p className="text-gray-500 text-[10px] uppercase tracking-[0.4em] leading-relaxed max-w-[200px]">
-              Elevando el estándar de la salud visual en Mérida.
+            <p className="text-gray-500 text-[10px] uppercase tracking-[0.4em] leading-relaxed max-w-[220px]">
+              {BUSINESS_INFO.slogan} en Mérida.
             </p>
           </div>
 
@@ -44,8 +45,9 @@ export default function Footer() {
             <span className="text-[#c5a059] text-[9px] font-black uppercase tracking-[0.5em] mb-2">Explorar</span>
             <div className="flex flex-col gap-3 text-gray-400 text-[10px] uppercase tracking-widest font-bold">
               <a href="#about" className="hover:text-white transition-colors">Nosotros</a>
+              <a href="#marcos" className="hover:text-white transition-colors">Colección</a>
+              <a href="#servicios" className="hover:text-white transition-colors">Servicios</a>
               <a href="#equipo" className="hover:text-white transition-colors">Especialistas</a>
-              <a href="#paquetes" className="hover:text-white transition-colors">Servicios</a>
               <a href="#contacto" className="hover:text-white transition-colors">Ubicación</a>
             </div>
           </div>
@@ -53,9 +55,33 @@ export default function Footer() {
           {/* Social y Hora Local */}
           <div className="flex flex-col items-center md:items-start gap-8">
             <div className="flex gap-6">
-              <a href="#" className="text-white/30 hover:text-[#c5a059] transition-colors"><FaInstagram size={20} /></a>
-              <a href="#" className="text-white/30 hover:text-[#c5a059] transition-colors"><FaWhatsapp size={20} /></a>
-              <a href="#" className="text-white/30 hover:text-[#c5a059] transition-colors"><FaMapMarkerAlt size={20} /></a>
+              <a 
+                href={BUSINESS_INFO.instagramUrl} 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="text-white/40 hover:text-[#c5a059] transition-colors p-1"
+                title="Instagram"
+              >
+                <FaInstagram size={20} />
+              </a>
+              <a 
+                href={buildWhatsAppLink(`¡Hola ${BUSINESS_INFO.name}! 👋 Quiero consultar información sobre sus armazones.`)} 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="text-white/40 hover:text-[#c5a059] transition-colors p-1"
+                title="WhatsApp Oficial"
+              >
+                <FaWhatsapp size={20} />
+              </a>
+              <a 
+                href={BUSINESS_INFO.mapsUrl} 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="text-white/40 hover:text-[#c5a059] transition-colors p-1"
+                title="Google Maps"
+              >
+                <FaMapMarkerAlt size={20} />
+              </a>
             </div>
             
             <div className="text-white font-black uppercase tracking-[0.3em]">
@@ -69,8 +95,7 @@ export default function Footer() {
         <div className="pt-12 border-t border-white/5 flex flex-col items-center gap-10">
           <div className="flex flex-col items-center group cursor-default">
             <span className="text-[8px] tracking-[1em] text-gray-600 uppercase mb-4">Developed by</span>
-            <div className="relative opacity-50 group-hover:opacity-100 transition-all duration-700 filter grayscale group-hover:grayscale-0">
-               {/* Acá va tu logo de FocusFV */}
+            <div className="relative opacity-60 group-hover:opacity-100 transition-all duration-700">
                <span className="text-xl font-black text-white tracking-tighter">FOCUS<span className="text-[#c5a059]">FV</span></span>
             </div>
           </div>
@@ -78,8 +103,8 @@ export default function Footer() {
           <div className="flex flex-col md:flex-row justify-between w-full items-center gap-6 text-[9px] tracking-[0.4em] text-gray-600 uppercase font-medium">
             <p>© 2026 ÓPTICA DANNY. TODOS LOS DERECHOS RESERVADOS.</p>
             <div className="flex gap-8">
-              <span className="hover:text-white cursor-pointer transition-colors">Privacy</span>
-              <span className="hover:text-white cursor-pointer transition-colors">Terms</span>
+              <span className="hover:text-white cursor-pointer transition-colors">Privacidad</span>
+              <span className="hover:text-white cursor-pointer transition-colors">Términos</span>
             </div>
           </div>
         </div>

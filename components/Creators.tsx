@@ -37,7 +37,7 @@ export default function Creators() {
   }, [selectedMember]);
 
   return (
-    <section id="creators" className="py-32 px-6 bg-transparent relative overflow-hidden">
+    <div className="py-24 px-6 bg-transparent relative overflow-hidden">
       <div className="max-w-7xl mx-auto relative z-10">
         
         <div className="mb-20 text-center md:text-left">
@@ -128,6 +128,6 @@ export default function Creators() {
         </AnimatePresence>,
         document.body
       )}
-    </section>
+    </div>
   );
 }

@@ -6,7 +6,7 @@ import { Users, Target, Zap, Sparkles, Eye } from 'lucide-react';
 
 export default function About() {
   return (
-    <section id="about" className="py-20 md:py-32 relative bg-transparent">
+    <div className="py-20 md:py-32 relative bg-transparent">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start max-w-7xl mx-auto px-6">
         
         <div className="lg:col-span-5 lg:sticky lg:top-24">
@@ -45,6 +45,6 @@ export default function About() {
           </div>
         </div>
       </div>
-    </section>
+    </div>
   );
 }

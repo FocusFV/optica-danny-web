@@ -9,11 +9,6 @@ export default function Hero() {
   
   const scaleScroll = useTransform(scrollY, [0, 700], [1, 12]);
   const opacity = useTransform(scrollY, [0, 500], [1, 0]);
-  
-  const filterStyle = useTransform(scrollY, (value) => {
-    const currentBlur = Math.max(0, 4 - value / 100);
-    return `blur(${currentBlur}px)`;
-  });
 
   useEffect(() => {
     setIsMounted(true);

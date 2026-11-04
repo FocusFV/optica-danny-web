@@ -12,6 +12,8 @@ import Marquee from '../components/Marquee';
 import Gallery from '../components/Gallery';
 import Contact from '../components/Contact';
 import CustomCursor from '../components/CustomCursor';
+import ComingSoon from '../components/ComingSoon';
+import { useMaintenance } from '../lib/maintenance';
 
 import { obtenerArmazones, Armazon } from '../lib/armazones';
 
@@ -21,6 +23,15 @@ interface ArmazonExtendida extends Armazon {
 }
 
 export default function Home() {
+  const {
+    isMaintenanceConfigured,
+    isBlocked,
+    isPreviewUnlocked,
+    unlockPreview,
+    lockPreview,
+    checking,
+  } = useMaintenance();
+
   const [armazones, setArmazones] = useState<ArmazonExtendida[]>([]);
   const [cargando, setCargando] = useState(true);
 
@@ -52,42 +63,71 @@ export default function Home() {
 
   // --- MOTOR DE FILTRADO INTELIGENTE COMBINADO MÁS STOCK ---
   const armazonesFiltrados = armazones.filter((item) => {
-    const nombreLower = item.nombre.toLowerCase(); //
-    const descLower = (item.descripcion || "").toLowerCase(); //
+    const nombreLower = item.nombre.toLowerCase();
+    const descLower = (item.descripcion || "").toLowerCase();
+    const categoria = (item.categoria || "").toLowerCase();
+    const genero = (item.genero || "").toLowerCase();
+    const marca = (item.marca || "").toLowerCase();
 
-    // 1. Filtro por Buscador de Texto
-    const coincideTexto = nombreLower.includes(busqueda.toLowerCase()) || descLower.includes(busqueda.toLowerCase()); //
-    
+    // 1. Filtro por Buscador de Texto (nombre, descripción o marca)
+    const query = busqueda.toLowerCase().trim();
+    const coincideTexto =
+      !query ||
+      nombreLower.includes(query) ||
+      descLower.includes(query) ||
+      marca.includes(query);
+
     // 2. Filtro por Precio Máximo
-    const coincidePrecio = item.precio <= precioMaximo; //
+    const coincidePrecio = item.precio <= precioMaximo;
 
-    // 3. Filtro Inteligente por Tipo de Lente
-    let coincideTipo = true; //
-    if (tipoActivo === "sol") { //
-      coincideTipo = nombreLower.includes("sol") || descLower.includes("sol"); //
-    } else if (tipoActivo === "inteligentes") { //
-      coincideTipo = nombreLower.includes("smart") || nombreLower.includes("inteligente") || descLower.includes("smart") || descLower.includes("meta"); //
-    } else if (tipoActivo === "oftalmicos") { //
-      const esSol = nombreLower.includes("sol") || descLower.includes("sol"); //
-      const esSmart = nombreLower.includes("smart") || nombreLower.includes("inteligente") || descLower.includes("smart"); //
-      coincideTipo = !esSol && !esSmart; //
+    // 3. Filtro por Tipo de Lente (propiedad estructurada con fallback para compatibilidad)
+    let coincideTipo = true;
+    if (tipoActivo === "sol") {
+      coincideTipo =
+        categoria === "sol" ||
+        nombreLower.includes("sol") ||
+        descLower.includes("sol");
+    } else if (tipoActivo === "inteligentes") {
+      coincideTipo =
+        categoria === "inteligente" ||
+        categoria === "smart" ||
+        nombreLower.includes("smart") ||
+        nombreLower.includes("inteligente") ||
+        descLower.includes("smart") ||
+        descLower.includes("meta");
+    } else if (tipoActivo === "oftalmicos") {
+      coincideTipo =
+        categoria === "oftalmico" ||
+        (!nombreLower.includes("sol") &&
+          !descLower.includes("sol") &&
+          !nombreLower.includes("smart"));
     }
 
-    // 4. Filtro Inteligente por Género / Sexo
-    let coincideGenero = true; //
-    if (generoActivo === "hombre") { //
-      coincideGenero = nombreLower.includes("hombre") || descLower.includes("hombre") || descLower.includes("masculino"); //
-    } else if (generoActivo === "mujer") { //
-      coincideGenero = nombreLower.includes("mujer") || descLower.includes("mujer") || descLower.includes("femenino") || nombreLower.includes("dama"); //
-    } else if (generoActivo === "unisex") { //
-      coincideGenero = nombreLower.includes("unisex") || descLower.includes("unisex") || (!nombreLower.includes("hombre") && !descLower.includes("mujer")); //
+    // 4. Filtro por Género / Sexo
+    let coincideGenero = true;
+    if (generoActivo === "hombre") {
+      coincideGenero =
+        genero === "hombre" ||
+        nombreLower.includes("hombre") ||
+        descLower.includes("hombre") ||
+        descLower.includes("masculino");
+    } else if (generoActivo === "mujer") {
+      coincideGenero =
+        genero === "mujer" ||
+        nombreLower.includes("mujer") ||
+        descLower.includes("mujer") ||
+        descLower.includes("femenino") ||
+        nombreLower.includes("dama");
+    } else if (generoActivo === "unisex") {
+      coincideGenero =
+        genero === "unisex" ||
+        nombreLower.includes("unisex") ||
+        (!nombreLower.includes("hombre") && !descLower.includes("mujer"));
     }
 
-    // 🔥 5. NUEVA REGLA: Filtro de Disponibilidad de Stock real
-    // Si 'soloDisponibles' está activo, el item debe tener stock mayor a 0. Si no está activo, pasa de largo.
+    // 5. Filtro de Disponibilidad de Stock real
     const coincideStock = !soloDisponibles || (item.stock && item.stock > 0);
 
-    // El elemento debe cumplir TODOS los filtros en simultáneo
     return coincideTexto && coincidePrecio && coincideTipo && coincideGenero && coincideStock;
   });
 
@@ -98,9 +138,30 @@ export default function Home() {
     setLimiteVisible(12); //
   }, [busqueda, tipoActivo, generoActivo, precioMaximo, soloDisponibles]);
 
+  // Si el modo construcción está activo y el usuario no ha desbloqueado la vista previa
+  if (isBlocked && !checking) {
+    return <ComingSoon onUnlockPreview={unlockPreview} />;
+  }
+
   return (
     <main className="min-h-screen bg-[#001529] text-white relative selection:bg-[#c5a059] selection:text-black">
       
+      {/* BANNER FLOTANTE DE VISTA PREVIA (Solo visible para el equipo cuando desbloquea el modo construcción) */}
+      {isMaintenanceConfigured && isPreviewUnlocked && (
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[300] bg-[#021120]/95 border border-[#c5a059]/40 rounded-full px-5 py-2 shadow-2xl backdrop-blur-xl flex items-center gap-3 text-[10px] uppercase font-bold tracking-widest text-[#c5a059] animate-fade-in">
+          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span className="text-white">Vista Previa Activa</span>
+          <span className="text-neutral-500">|</span>
+          <button
+            type="button"
+            onClick={lockPreview}
+            className="text-[#c5a059] hover:text-rose-400 transition-colors underline"
+          >
+            Ver como el público
+          </button>
+        </div>
+      )}
+
       <CustomCursor />
 
       {/* Fondos */}

@@ -1,13 +1,14 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { createPortal } from "react-dom"; // 👇 El truco para sacarlo del "agujero negro" del detalle
+import { createPortal } from "react-dom";
 import { motion, useMotionValue, useSpring } from "framer-motion";
 
 export default function CustomCursor() {
   const [isHovered, setIsHovered] = useState(false);
   const [isClicked, setIsClicked] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
+  const [isOverInput, setIsOverInput] = useState(false);
   const [mounted, setMounted] = useState(false);
 
   const mouseX = useMotionValue(0);
@@ -31,10 +32,19 @@ export default function CustomCursor() {
 
     const handleMouseOver = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
+      if (!target) return;
+
+      const isInput =
+        target.tagName === "INPUT" ||
+        target.tagName === "TEXTAREA" ||
+        target.tagName === "SELECT";
+
+      setIsOverInput(isInput);
+
       if (
-        target.tagName === "A" || 
-        target.tagName === "BUTTON" || 
-        target.closest("button") || 
+        target.tagName === "A" ||
+        target.tagName === "BUTTON" ||
+        target.closest("button") ||
         target.closest("a") ||
         target.closest("[role='button']") ||
         target.classList.contains("clickable")
@@ -60,15 +70,18 @@ export default function CustomCursor() {
     };
   }, [mouseX, mouseY, isVisible]);
 
-  // Si no está montado en el cliente o no se movió el mouse, no renderiza nada
   if (!mounted || !isVisible) return null;
 
-  // 🏛️ Teletransportamos el cursor directo al final del <body> de la app
   return createPortal(
     <>
       <style jsx global>{`
-        *, *::before, *::after {
-          cursor: none !important;
+        @media (min-width: 768px) {
+          body, a, button, [role="button"], label {
+            cursor: none;
+          }
+          input, textarea, select {
+            cursor: text !important;
+          }
         }
         @media (max-width: 768px) {
           *, *::before, *::after { cursor: auto !important; }
@@ -78,6 +91,11 @@ export default function CustomCursor() {
 
       <motion.div
         className="ojo-cursor-luxury-portal hidden md:flex items-center justify-center mix-blend-screen"
+        animate={{
+          opacity: isOverInput ? 0 : 1,
+          scale: isOverInput ? 0.5 : 1,
+        }}
+        transition={{ duration: 0.15 }}
         style={{ 
           x: cursorX, 
           y: cursorY, 
@@ -86,12 +104,11 @@ export default function CustomCursor() {
           position: "fixed",
           top: 0,
           left: 0,
-          zIndex: 999999999, // Arriba de absolutamente TODO
+          zIndex: 999999999,
           pointerEvents: "none"
         }}
       >
         <div className="relative w-12 h-12 flex items-center justify-center">
-          
           {/* PÁRPADO SUPERIOR */}
           <motion.div
             className="absolute border-t border-[#c5a059] w-9 h-4 rounded-t-full"
@@ -129,7 +146,6 @@ export default function CustomCursor() {
             }}
             transition={{ type: "spring", damping: 20, stiffness: 350 }}
           />
-
         </div>
       </motion.div>
     </>,

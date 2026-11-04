@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { Check, Zap, Eye, Sparkles, X } from 'lucide-react';
 import 'react-phone-number-input/style.css';
 import PhoneInput from 'react-phone-number-input';
+import { BUSINESS_INFO, buildWhatsAppLink } from '@/lib/constants';
 
 const packages = [
   {
@@ -51,8 +52,6 @@ export default function Packages() {
   const [formData, setFormData] = useState({ nombre: '', ciudad: '' });
   const [phone, setPhone] = useState<string | undefined>();
 
-  const WHATSAPP_NUMBER = "529992207996"; 
-
   const handleOpen = (pkgName: string) => {
     setSelectedPkg(pkgName);
     setIsOpen(true);
@@ -60,14 +59,14 @@ export default function Packages() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const mensaje = `¡Hola Óptica Danny! 👓✨\n\nSoy *${formData.nombre}* de *${formData.ciudad}*.\n\nMe interesa consultar por: 🌟 *${selectedPkg}* 🌟.\n\nMi WhatsApp: ${phone}.\n\n¡Espero su respuesta!`;
-    const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(mensaje)}`;
+    const mensaje = `¡Hola ${BUSINESS_INFO.name}! 👓✨\n\nSoy *${formData.nombre}* de *${formData.ciudad}*.\n\nMe interesa consultar por: 🌟 *${selectedPkg}* 🌟.\n\nMi WhatsApp: ${phone || "No especificado"}.\n\n¡Espero su respuesta!`;
+    const url = buildWhatsAppLink(mensaje);
     window.open(url, '_blank');
     setIsOpen(false);
   };
 
   return (
-    <section className="py-24 px-6 relative bg-transparent" id="servicios">
+    <div className="py-24 px-6 relative bg-transparent">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-20">
           <h2 className="text-3xl md:text-5xl font-black tracking-tighter text-white uppercase mb-4">
@@ -131,6 +130,6 @@ export default function Packages() {
           </div>
         </div>
       )}
-    </section>
+    </div>
   );
 }

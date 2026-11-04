@@ -1,27 +1,46 @@
 import { NextResponse } from "next/server";
-import { db } from "@/lib/firebase";
-import { doc, updateDoc } from "firebase/firestore";
+import { adminDb } from "@/lib/firebase-admin";
+import { verifyAdminAuth } from "@/lib/admin-auth";
 
-export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
+export const dynamic = "force-dynamic";
+
+export async function PUT(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
-    // 🔥 CORRECCIÓN CLAVE NEXT.JS 15: Esperamos a que los params se resuelvan asíncronamente
+    const isAuthorized = await verifyAdminAuth(request);
+    if (!isAuthorized) {
+      return NextResponse.json(
+        { error: "No autorizado. Se requieren credenciales de administrador." },
+        { status: 401 }
+      );
+    }
+
     const { id } = await params;
-    
     const body = await request.json();
 
-    // Referencia al documento exacto en la colección de Firestore
-    const productoRef = doc(db, "armazones", id);
+    const productoRef = adminDb.collection("armazones").doc(id);
 
-    // Actualizamos los campos en la base de datos
-    await updateDoc(productoRef, {
+    const datosActualizados: Record<string, unknown> = {
       nombre: body.nombre,
       precio: Number(body.precio),
       stock: Number(body.stock),
       descripcion: body.descripcion || "",
-      material: body.material || "Acetato Premium"
-    });
+      material: body.material || "Acetato Premium",
+      categoria: body.categoria || "oftalmico",
+      genero: body.genero || "unisex",
+      marca: body.marca || "Óptica Danny",
+      actualizadoEn: new Date(),
+    };
 
-    return NextResponse.json({ success: true, message: "Armazón actualizado impecable" });
+    if (body.imagen) {
+      datosActualizados.imagen = body.imagen;
+    }
+
+    await productoRef.update(datosActualizados);
+
+    return NextResponse.json({ success: true, message: "Armazón actualizado correctamente" });
   } catch (error: any) {
     console.error("❌ Error en la ruta PUT de administración:", error);
     return NextResponse.json(

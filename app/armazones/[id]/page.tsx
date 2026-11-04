@@ -3,6 +3,11 @@
 import React, { useState, useEffect, use } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { useCart } from "@/context/CartContext";
+import { BUSINESS_INFO, buildWhatsAppLink } from "@/lib/constants";
+import { ShoppingBag } from "lucide-react";
+import ComingSoon from "@/components/ComingSoon";
+import { useMaintenance } from "@/lib/maintenance";
 
 interface Armazon {
   id: string;
@@ -19,10 +24,22 @@ export default function ArmazonDetallePage({ params }: { params: Promise<{ id: s
   const searchParams = useSearchParams();
   const estadoPagoUrl = searchParams ? searchParams.get("pago") : null; 
 
+  const {
+    isMaintenanceConfigured,
+    isBlocked,
+    isPreviewUnlocked,
+    unlockPreview,
+    lockPreview,
+    checking,
+  } = useMaintenance();
+
   const [armazon, setArmazon] = useState<Armazon | null>(null);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState("");
   const [pestaniaActiva, setPestaniaActiva] = useState("detalles");
+
+  // Hook del carrito global
+  const { agregarProducto, totalItems, setIsCartOpen } = useCart();
 
   // --- ESTADOS DEL CHECKOUT REAL ---
   const [mostrarModal, setMostrarModal] = useState(false);
@@ -57,36 +74,6 @@ export default function ArmazonDetallePage({ params }: { params: Promise<{ id: s
     if (id) cargarDetalle();
   }, [id]);
 
-  // 2. DETECTA EL PAGO EXITOSO, DESCUENTA STOCK Y REGISTRA LA VENTA
-  useEffect(() => {
-    const aplicarDescuentoStock = async () => {
-      if (estadoPagoUrl === "exitoso" && armazon && !stockDescontado) {
-        try {
-          const res = await fetch("/api/armazones/descontar", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ 
-              id: armazon.id,
-              nombreLente: armazon.nombre,
-              precio: armazon.precio,
-              nombreComprador: nombreTarjeta || "Cliente Web"
-            }),
-          });
-          
-          if (res.ok) {
-            console.log("🔥 Stock actualizado y venta registrada en Firestore correctamente.");
-            setStockDescontado(true);
-            setArmazon(prev => prev ? { ...prev, stock: prev.stock - 1 } : null);
-          }
-        } catch (err) {
-          console.error("Error al intentar procesar la venta y stock:", err);
-        }
-      }
-    };
-
-    aplicarDescuentoStock();
-  }, [estadoPagoUrl, armazon, stockDescontado, nombreTarjeta]);
-
   // Conexión real con Mercado Pago
   const manejarPagoMercadoPago = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -101,6 +88,7 @@ export default function ArmazonDetallePage({ params }: { params: Promise<{ id: s
           id: armazon.id,
           nombre: armazon.nombre,
           precio: armazon.precio,
+          comprador: nombreTarjeta || "Cliente Web",
         }),
       });
 
@@ -109,7 +97,7 @@ export default function ArmazonDetallePage({ params }: { params: Promise<{ id: s
       if (data.urlPago) {
         window.location.href = data.urlPago;
       } else {
-        alert("Hubo un problema al generar el enlace.");
+        alert("Hubo un problema al generar el enlace de pago.");
         setProcesandoPago(false);
       }
     } catch (err) {
@@ -117,6 +105,11 @@ export default function ArmazonDetallePage({ params }: { params: Promise<{ id: s
       setProcesandoPago(false);
     }
   };
+
+  // Si el modo mantenimiento está activo y no se desbloqueó la preview
+  if (isBlocked && !checking) {
+    return <ComingSoon onUnlockPreview={unlockPreview} />;
+  }
 
   if (cargando) {
     return (
@@ -141,23 +134,33 @@ export default function ArmazonDetallePage({ params }: { params: Promise<{ id: s
     );
   }
 
-  // Configuración de Mensajes de WhatsApp (Estándar vs Post-Compra)
-  const numeroTelefono = "529990000000"; 
+  // Configuración de Mensajes de WhatsApp oficiales (Estándar vs Post-Compra)
+  const mensajeConsulta = `¡Hola ${BUSINESS_INFO.name}! 👋 Me interesa consultar disponibilidad del armazón "${armazon.nombre}".\n\nEnlace: https://optica-danny.vercel.app/armazones/${armazon.id}`;
   
-  const mensajeConsulta = encodeURIComponent(
-    `¡Hola Óptica Danny! 👋 Me interesa consultar disponibilidad del armazón "${armazon.nombre}".\n\nEnlace: https://optica-danny.vercel.app/armazones/${armazon.id}`
-  );
-  
-  const mensajePostCompra = encodeURIComponent(
-    `¡Hola Óptica Danny! 💳✨ Acabo de realizar el pago de mi armazón "${armazon.nombre}" a través de la web.\n\n📄 Código de Operación: #${codigoOperacion}\n💰 Monto: $${armazon.precio.toLocaleString("es-MX")} MXN\n📍 Quiero coordinar la entrega en Mérida.`
-  );
+  const mensajePostCompra = `¡Hola ${BUSINESS_INFO.name}! 💳✨ Acabo de realizar el pago de mi armazón "${armazon.nombre}" a través de la web.\n\n📄 Código de Operación: #${codigoOperacion}\n💰 Monto: $${armazon.precio.toLocaleString("es-MX")} MXN\n📍 Quiero coordinar la entrega en Mérida.`;
 
-  const linkWhatsAppConsulta = `https://wa.me/${numeroTelefono}?text=${mensajeConsulta}`;
-  const linkWhatsAppPostCompra = `https://wa.me/${numeroTelefono}?text=${mensajePostCompra}`;
+  const linkWhatsAppConsulta = buildWhatsAppLink(mensajeConsulta);
+  const linkWhatsAppPostCompra = buildWhatsAppLink(mensajePostCompra);
 
   return (
     <div className="min-h-screen bg-[#000e1a] text-white relative overflow-hidden flex flex-col justify-between selection:bg-[#c5a059] selection:text-black">
       
+      {/* BANNER FLOTANTE DE VISTA PREVIA */}
+      {isMaintenanceConfigured && isPreviewUnlocked && (
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[300] bg-[#021120]/95 border border-[#c5a059]/40 rounded-full px-5 py-2 shadow-2xl backdrop-blur-xl flex items-center gap-3 text-[10px] uppercase font-bold tracking-widest text-[#c5a059] animate-fade-in">
+          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span className="text-white">Vista Previa Activa</span>
+          <span className="text-neutral-500">|</span>
+          <button
+            type="button"
+            onClick={lockPreview}
+            className="text-[#c5a059] hover:text-rose-400 transition-colors underline"
+          >
+            Ver como el público
+          </button>
+        </div>
+      )}
+
       {/* Fondos Luxury */}
       <div className="absolute inset-0 z-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-[#0b2b47] via-[#000e1a] to-[#000e1a]"></div>
       <div className="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] bg-[#c5a059]/5 rounded-full blur-[150px] z-0 pointer-events-none"></div>
@@ -167,9 +170,24 @@ export default function ArmazonDetallePage({ params }: { params: Promise<{ id: s
         <Link href="/" className="flex items-center gap-2">
           <span className="text-white font-black tracking-[0.3em] text-sm md:text-base">ÓPTICA DANNY</span>
         </Link>
-        <Link href="/" className="text-xs text-neutral-400 hover:text-white uppercase tracking-widest transition-colors font-bold">
-          ← Volver a la galería
-        </Link>
+        <div className="flex items-center gap-6">
+          <button
+            type="button"
+            onClick={() => setIsCartOpen(true)}
+            className="relative p-2 text-white/80 hover:text-[#c5a059] transition-colors rounded-xl hover:bg-white/5"
+            title="Ver carrito de compras"
+          >
+            <ShoppingBag size={18} />
+            {totalItems > 0 && (
+              <span className="absolute top-0 right-0 bg-[#c5a059] text-black text-[9px] font-black w-4 h-4 rounded-full flex items-center justify-center shadow-md">
+                {totalItems}
+              </span>
+            )}
+          </button>
+          <Link href="/" className="text-xs text-neutral-400 hover:text-white uppercase tracking-widest transition-colors font-bold">
+            ← Catálogo
+          </Link>
+        </div>
       </header>
 
       {/* CONTENEDOR FICHA TÉCNICA */}
@@ -228,7 +246,7 @@ export default function ArmazonDetallePage({ params }: { params: Promise<{ id: s
                     </button>
                     
                     <a 
-                      href={`https://wa.me/${numeroTelefono}?text=${encodeURIComponent(`¡Hola Óptica Danny! 👋 Tuve un problema al intentar pagar el armazón "${armazon.nombre}" por la web. ¿Me dan una mano para completarlo?`)}`}
+                      href={buildWhatsAppLink(`¡Hola ${BUSINESS_INFO.name}! 👋 Tuve un problema al intentar pagar el armazón "${armazon.nombre}" por la web. ¿Me dan una mano para completarlo?`)}
                       target="_blank" 
                       rel="noopener noreferrer" 
                       className="flex-1 border border-white/10 bg-white/5 text-white font-black text-[10px] uppercase tracking-[0.15em] p-3.5 rounded-xl transition-colors hover:bg-white/10 flex items-center justify-center gap-1"
@@ -277,9 +295,29 @@ export default function ArmazonDetallePage({ params }: { params: Promise<{ id: s
             </div>
           </div>
 
-          {/* DOBLE BOTÓN DE ACCIÓN (WHATSAPP + TARJETA) */}
+          {/* BOTONES DE ACCIÓN (CARRITO + TARJETA + WHATSAPP) */}
           <div className="space-y-3">
             <button 
+              type="button"
+              onClick={() => {
+                if (armazon) {
+                  agregarProducto({
+                    id: armazon.id,
+                    nombre: armazon.nombre,
+                    precio: armazon.precio,
+                    imagen: armazon.imagen,
+                  });
+                }
+              }}
+              disabled={armazon.stock <= 0}
+              className="w-full bg-[#c5a059] text-black hover:bg-[#dfba75] disabled:bg-neutral-800 disabled:text-neutral-500 font-black text-xs uppercase tracking-[0.25em] p-4 rounded-xl transition-all flex items-center justify-center gap-3 shadow-xl active:scale-[0.99]"
+            >
+              <ShoppingBag size={16} />
+              <span>Agregar al Carrito</span>
+            </button>
+
+            <button 
+              type="button"
               onClick={() => setMostrarModal(true)}
               disabled={armazon.stock <= 0}
               className="w-full relative overflow-hidden bg-white text-black hover:bg-neutral-200 disabled:bg-neutral-800 disabled:text-neutral-500 font-black text-xs uppercase tracking-[0.25em] p-4 rounded-xl transition-all flex items-center justify-center gap-3 shadow-xl active:scale-[0.99]"

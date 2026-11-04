@@ -1,51 +1,21 @@
 import { NextResponse } from "next/server";
-import admin from "firebase-admin";
-import path from "path";
+import { adminDb } from "@/lib/firebase-admin";
+import { verifyAdminAuth } from "@/lib/admin-auth";
 
 export const dynamic = "force-dynamic";
 
-if (!admin.apps.length) {
-  let credential: admin.ServiceAccount;
-
-  // Si la variable de Vercel existe, la usamos directamente
-  if (process.env.FIREBASE_SERVICE_ACCOUNT) {
-    credential = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
-  } else {
-    // Si estamos en tu compu local, leemos el archivo usando fs de forma asíncrona 
-    // para que el compilador no intente meterlo a la fuerza en el build
-    const fs = require("fs");
-    const path = require("path");
-    const rutaLlave = path.join(process.cwd(), "firebase-key.json");
-    credential = JSON.parse(fs.readFileSync(rutaLlave, "utf8"));
-  }
-
-  admin.initializeApp({
-    credential: admin.credential.cert(credential),
-    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-  });
-}
-
-const dbAdmin = admin.firestore();
-
-// 👇 ACÁ ESTÁ EL CAMBIO: Tipamos 'context' exactamente como lo pide Vercel
 export async function GET(
-  request: Request,
-  context: { params: Promise<{ id: string }> } // <-- Le decimos que params es una Promesa
+  _request: Request,
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
-    // Esperamos a la promesa de los params de forma segura
-    const params = await context.params;
-    const id = params?.id;
-    
-    console.log("======================================");
-    console.log(`🔍 BUSCANDO EN FIREBASE EL ID: "${id}"`);
-    console.log("======================================");
+    const { id } = await context.params;
 
     if (!id) {
       return NextResponse.json({ error: "Falta el ID" }, { status: 400 });
     }
 
-    const docRef = dbAdmin.collection("armazones").doc(id);
+    const docRef = adminDb.collection("armazones").doc(id);
     const docSnap = await docRef.get();
 
     if (!docSnap.exists) {
@@ -53,48 +23,54 @@ export async function GET(
     }
 
     const data = docSnap.data();
-    
+
     return NextResponse.json({
       id: docSnap.id,
       nombre: data?.nombre || "Sin nombre",
       precio: Number(data?.precio) || 0,
       imagen: data?.imagen || "",
       stock: Number(data?.stock) || 0,
-      descripcion: data?.descripcion || ""
+      descripcion: data?.descripcion || "",
+      material: data?.material || "Acetato Premium",
+      categoria: data?.categoria || "oftalmico",
+      genero: data?.genero || "unisex",
+      marca: data?.marca || "Óptica Danny",
     });
-
   } catch (error) {
     console.error("❌ ERROR EN API DETALLE:", error);
     return NextResponse.json({ error: "Error interno del servidor" }, { status: 500 });
   }
 }
+
 export async function DELETE(
   request: Request,
   context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const params = await context.params;
-    const id = params?.id;
+    const isAuthorized = await verifyAdminAuth(request);
+    if (!isAuthorized) {
+      return NextResponse.json(
+        { error: "No autorizado. Se requieren credenciales de administrador." },
+        { status: 401 }
+      );
+    }
 
-    console.log(`🗑️ INTENTANDO BORRAR EL ARMAZÓN CON ID: "${id}"`);
+    const { id } = await context.params;
 
     if (!id) {
       return NextResponse.json({ error: "Falta el ID" }, { status: 400 });
     }
 
-    const docRef = dbAdmin.collection("armazones").doc(id);
+    const docRef = adminDb.collection("armazones").doc(id);
     const docSnap = await docRef.get();
 
     if (!docSnap.exists) {
       return NextResponse.json({ error: "El armazón no existe" }, { status: 404 });
     }
 
-    // Borramos el documento de Firestore
     await docRef.delete();
-    console.log(`✅ ARMAZÓN ${id} ELIMINADO CON ÉXITO.`);
 
     return NextResponse.json({ success: true, message: "Armazón eliminado correctamente" });
-
   } catch (error) {
     console.error("❌ ERROR AL BORRAR ARMAZÓN:", error);
     return NextResponse.json({ error: "Error interno del servidor" }, { status: 500 });

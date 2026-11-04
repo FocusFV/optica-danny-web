@@ -1,17 +1,27 @@
 import { NextResponse } from "next/server";
-import { db } from "@/lib/firebase";
-import { collection, getDocs, query, orderBy } from "firebase/firestore";
+import { adminDb } from "@/lib/firebase-admin";
+import { verifyAdminAuth } from "@/lib/admin-auth";
 
-export async function GET() {
+export const dynamic = "force-dynamic";
+
+export async function GET(request: Request) {
   try {
-    const ventasRef = collection(db, "ventas");
-    // Traemos las ventas ordenadas de la más nueva a la más vieja
-    const q = query(ventasRef, orderBy("fecha", "desc"));
-    const querySnapshot = await getDocs(q);
+    const isAuthorized = await verifyAdminAuth(request);
+    if (!isAuthorized) {
+      return NextResponse.json(
+        { error: "No autorizado. Se requieren credenciales de administrador." },
+        { status: 401 }
+      );
+    }
 
-    const ventas = querySnapshot.docs.map(doc => ({
+    const snapshot = await adminDb
+      .collection("ventas")
+      .orderBy("fecha", "desc")
+      .get();
+
+    const ventas = snapshot.docs.map((doc) => ({
       id: doc.id,
-      ...doc.data()
+      ...doc.data(),
     }));
 
     return NextResponse.json(ventas);
