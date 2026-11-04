@@ -139,7 +139,7 @@ export default function Home() {
   }, [busqueda, tipoActivo, generoActivo, precioMaximo, soloDisponibles]);
 
   // Si el modo construcción está activo y el usuario no ha desbloqueado la vista previa
-  if (isBlocked && !checking) {
+  if (isBlocked) {
     return <ComingSoon onUnlockPreview={unlockPreview} />;
   }
 

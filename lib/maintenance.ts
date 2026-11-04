@@ -6,6 +6,7 @@ export function useMaintenance() {
   // Por defecto, el modo mantenimiento está activo si no se desactiva explícitamente con "false"
   const isMaintenanceConfigured = process.env.NEXT_PUBLIC_MAINTENANCE_MODE !== "false";
 
+  // Inicializa leyendo directamente de localStorage si estamos en el cliente
   const [isPreviewUnlocked, setIsPreviewUnlocked] = useState(false);
   const [checking, setChecking] = useState(true);
 
@@ -36,8 +37,11 @@ export function useMaintenance() {
         if (res.ok) {
           const data = await res.json();
           if (data.authenticated) {
-            setIsPreviewUnlocked(true);
-            return;
+            // Nota: Si es admin pero no ha desbloqueado la preview explícitamente, lo dejamos elegir
+            // o si tiene preview_unlocked entra
+            if (localStorage.getItem("optica_preview_unlocked") === "true") {
+              setIsPreviewUnlocked(true);
+            }
           }
         }
       } catch (err) {

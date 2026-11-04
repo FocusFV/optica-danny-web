@@ -107,7 +107,7 @@ export default function ArmazonDetallePage({ params }: { params: Promise<{ id: s
   };
 
   // Si el modo mantenimiento está activo y no se desbloqueó la preview
-  if (isBlocked && !checking) {
+  if (isBlocked) {
     return <ComingSoon onUnlockPreview={unlockPreview} />;
   }
 
