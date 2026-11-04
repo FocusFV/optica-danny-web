@@ -92,6 +92,28 @@ const DICCIONARIO_MODELOS: Record<
   },
 };
 
+export function limpiarMaterial(raw?: string): string {
+  if (!raw) return "Acetato";
+  const r = raw.toLowerCase();
+  const hasAcetato = r.includes("acetato");
+  const hasMetal =
+    r.includes("metal") ||
+    r.includes("alambre") ||
+    r.includes("aleación") ||
+    r.includes("acero") ||
+    r.includes("gunmetal") ||
+    r.includes("dorado") ||
+    r.includes("plateado");
+  const hasTR90 = r.includes("tr90") || r.includes("ultem") || r.includes("polímero");
+
+  if (hasAcetato && hasMetal) return "Acetato + Metal";
+  if (hasTR90 && hasMetal) return "TR90 + Metal";
+  if (hasAcetato) return "Acetato";
+  if (hasMetal) return "Metal";
+  if (hasTR90) return "TR90";
+  return "Acetato";
+}
+
 /**
  * Parser inteligente de medidas ópticas y atributos
  * Extrae calibre, puente, varilla y SKU a partir de la descripción o del diccionario
@@ -110,6 +132,9 @@ export function enriquecerArmazon(item: Armazon): ArmazonEnriquecido {
   let estilo = conocido?.estilo ?? "";
   let color = conocido?.color ?? "";
   let sku = conocido?.sku ?? "";
+
+  // Material 100% puro y limpio sin colores
+  const materialLimpio = limpiarMaterial(item.material);
 
   // 1. Parser regex de respaldo si no está en el diccionario
   if (!calibre || !puente || !varilla) {
@@ -207,6 +232,7 @@ export function enriquecerArmazon(item: Armazon): ArmazonEnriquecido {
     varilla,
     medidas,
     color,
+    material: materialLimpio,
     estilo,
     filtro_especial: str.toLowerCase().includes("uv420") || str.toLowerCase().includes("luz azul") 
       ? "UV420 Blue Light" 

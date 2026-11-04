@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from "react";
+import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Armazon } from "../lib/armazones";
 import { enriquecerArmazon, ArmazonEnriquecido } from "../lib/catalog-enricher";
@@ -15,14 +16,10 @@ import {
   MessageCircle,
   Eye,
   Ruler,
-  Info,
-  Sparkles,
   Zap,
   Check,
   Flame,
   ArrowRight,
-  Filter,
-  SlidersHorizontal,
 } from "lucide-react";
 
 interface GalleryProps {
@@ -32,8 +29,13 @@ interface GalleryProps {
 
 export default function Gallery({ armazones, cargando }: GalleryProps) {
   const { agregarProducto } = useCart();
+  const [isMounted, setIsMounted] = useState(false);
 
-  // Armazones enriquecidos con especificaciones ópticas
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  // Armazones enriquecidos con especificaciones ópticas y material limpio
   const armazonesEnriquecidos = useMemo(() => {
     return armazones.map(enriquecerArmazon);
   }, [armazones]);
@@ -48,6 +50,9 @@ export default function Gallery({ armazones, cargando }: GalleryProps) {
   const [orden, setOrden] = useState("default");
   const [soloStock, setSoloStock] = useState(false);
   const [filtroRapido, setFiltroRapido] = useState<string | null>(null);
+
+  // --- PAGINACIÓN INTELIGENTE PARA CATÁLOGOS GRANDES (+100 MODELOS) ---
+  const [limiteVisible, setLimiteVisible] = useState(9);
 
   // --- ESTADO DE FAVORITOS (PERSISTIDO EN LOCALSTORAGE) ---
   const [favoritos, setFavoritos] = useState<string[]>([]);
@@ -72,6 +77,33 @@ export default function Gallery({ armazones, cargando }: GalleryProps) {
       console.error("Error al leer favoritos:", e);
     }
   }, []);
+
+  // Bloqueo estricto del scroll de la página cuando un modal está abierto
+  useEffect(() => {
+    if (modalLente !== null || modalMedidasAbierto) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [modalLente, modalMedidasAbierto]);
+
+  // Resetear paginación a 9 cada vez que se toque cualquier filtro o búsqueda
+  useEffect(() => {
+    setLimiteVisible(9);
+  }, [
+    busqueda,
+    categoria,
+    genero,
+    material,
+    calibreRango,
+    marcaFiltro,
+    soloStock,
+    soloFavoritos,
+    filtroRapido,
+  ]);
 
   // Alternar favorito
   const toggleFavorito = (id: string, e?: React.MouseEvent) => {
@@ -105,7 +137,9 @@ export default function Gallery({ armazones, cargando }: GalleryProps) {
   const handleConsultarFavoritos = () => {
     const seleccionados = armazonesEnriquecidos.filter((l) => favoritos.includes(l.id));
     if (seleccionados.length === 0) return;
-    const listaModelos = seleccionados.map((m) => `• *${m.nombre}* (${m.marca}) - ${m.medidas || ""}`).join("\n");
+    const listaModelos = seleccionados
+      .map((m) => `• *${m.nombre}* (${m.marca}) - ${m.medidas || ""}`)
+      .join("\n");
     const mensaje = `¡Hola ${BUSINESS_INFO.name}! 👋\n\nEstuve viendo su catálogo web y guardé estos modelos en mis favoritos para cotizar:\n\n${listaModelos}\n\n¿Tienen disponibilidad y me podrían asesorar para graduarlos? 👓✨`;
     window.open(buildWhatsAppLink(mensaje), "_blank");
   };
@@ -136,16 +170,35 @@ export default function Gallery({ armazones, cargando }: GalleryProps) {
         const cat = (item.categoria || "").toLowerCase();
         if (categoria === "sol" && !cat.includes("sol")) return false;
         if (categoria === "oftalmico" && cat.includes("sol")) return false;
-        if (categoria === "inteligente" && !cat.includes("inteligente") && !cat.includes("smart")) return false;
+        if (categoria === "inteligente" && !cat.includes("inteligente") && !cat.includes("smart"))
+          return false;
       }
 
       // 5. Filtro por Género
       if (genero !== "todos") {
         const gen = (item.genero || "").toLowerCase();
         const desc = (item.descripcion || "").toLowerCase();
-        if (genero === "dama" && !gen.includes("mujer") && !gen.includes("dama") && !desc.includes("femenino")) return false;
-        if (genero === "caballero" && !gen.includes("hombre") && !gen.includes("caballero") && !desc.includes("masculino")) return false;
-        if (genero === "infantil" && !desc.includes("niño") && !desc.includes("infantil") && !desc.includes("kids")) return false;
+        if (
+          genero === "dama" &&
+          !gen.includes("mujer") &&
+          !gen.includes("dama") &&
+          !desc.includes("femenino")
+        )
+          return false;
+        if (
+          genero === "caballero" &&
+          !gen.includes("hombre") &&
+          !gen.includes("caballero") &&
+          !desc.includes("masculino")
+        )
+          return false;
+        if (
+          genero === "infantil" &&
+          !desc.includes("niño") &&
+          !desc.includes("infantil") &&
+          !desc.includes("kids")
+        )
+          return false;
         if (genero === "unisex" && !gen.includes("unisex")) return false;
       }
 
@@ -153,15 +206,21 @@ export default function Gallery({ armazones, cargando }: GalleryProps) {
       if (material !== "todos") {
         const mat = (item.material || "").toLowerCase();
         if (material === "acetato" && !mat.includes("acetato")) return false;
-        if (material === "metal" && !mat.includes("metal") && !mat.includes("acero") && !mat.includes("alambre")) return false;
+        if (
+          material === "metal" &&
+          !mat.includes("metal") &&
+          !mat.includes("acero") &&
+          !mat.includes("alambre")
+        )
+          return false;
         if (material === "tr90" && !mat.includes("tr90") && !mat.includes("ultem")) return false;
-        if (material === "hibrido" && !mat.includes("+") && !mat.includes("&") && !mat.includes("combinado")) return false;
+        if (material === "hibrido" && !mat.includes("+") && !mat.includes("&")) return false;
       }
 
       // 7. Filtro por Calibre (Aro)
       if (calibreRango !== "all") {
         const cal = item.calibre;
-        if (!cal) return true; // Si no tiene calibre exacto, no lo escondemos
+        if (!cal) return true;
         if (calibreRango === "small" && cal >= 50) return false;
         if (calibreRango === "medium" && (cal < 50 || cal > 52)) return false;
         if (calibreRango === "large" && cal <= 52) return false;
@@ -170,14 +229,16 @@ export default function Gallery({ armazones, cargando }: GalleryProps) {
       // 8. Búsqueda por texto libre
       if (busqueda.trim()) {
         const q = busqueda.toLowerCase().trim();
-        const stringTotal = `${item.sku} ${item.nombre} ${item.marca} ${item.estilo} ${item.color} ${item.material} ${item.medidas} ${item.descripcion}`.toLowerCase();
+        const stringTotal =
+          `${item.sku} ${item.nombre} ${item.marca} ${item.estilo} ${item.color} ${item.material} ${item.medidas} ${item.descripcion}`.toLowerCase();
         if (!stringTotal.includes(q)) return false;
       }
 
       // 9. Píldora de filtro rápido activa
       if (filtroRapido) {
         const q = filtroRapido.toLowerCase();
-        const stringTotal = `${item.sku} ${item.nombre} ${item.marca} ${item.estilo} ${item.color} ${item.material} ${item.medidas} ${item.descripcion}`.toLowerCase();
+        const stringTotal =
+          `${item.sku} ${item.nombre} ${item.marca} ${item.estilo} ${item.color} ${item.material} ${item.medidas} ${item.descripcion}`.toLowerCase();
         if (!stringTotal.includes(q)) return false;
       }
 
@@ -212,6 +273,11 @@ export default function Gallery({ armazones, cargando }: GalleryProps) {
     return copia;
   }, [filtrados, orden]);
 
+  // Modelos paginados visibles en la Home
+  const armazonesVisibles = useMemo(() => {
+    return armazonesOrdenados.slice(0, limiteVisible);
+  }, [armazonesOrdenados, limiteVisible]);
+
   // Limpiar todos los filtros
   const resetFiltros = () => {
     setBusqueda("");
@@ -224,6 +290,7 @@ export default function Gallery({ armazones, cargando }: GalleryProps) {
     setSoloStock(false);
     setSoloFavoritos(false);
     setFiltroRapido(null);
+    setLimiteVisible(9);
   };
 
   const hayFiltrosActivos =
@@ -242,7 +309,7 @@ export default function Gallery({ armazones, cargando }: GalleryProps) {
     <div className="py-8 px-2 bg-transparent">
       <div className="max-w-7xl mx-auto space-y-8">
         
-        {/* HEADER DE SECCIÓN & ACCESO A GUÍA DE MEDIDAS */}
+        {/* HEADER DE SECCIÓN */}
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 pb-4 border-b border-white/5">
           <div>
             <div className="flex items-center gap-2 mb-2">
@@ -260,7 +327,7 @@ export default function Gallery({ armazones, cargando }: GalleryProps) {
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
-            {/* BOTÓN GUÍA DE MEDIDAS (FEATURE #2) */}
+            {/* BOTÓN GUÍA DE MEDIDAS */}
             <button
               type="button"
               onClick={() => setModalMedidasAbierto(true)}
@@ -270,7 +337,7 @@ export default function Gallery({ armazones, cargando }: GalleryProps) {
               <span>¿Cómo saber tu medida?</span>
             </button>
 
-            {/* BOTÓN MIS FAVORITOS (FEATURE #4) */}
+            {/* BOTÓN MIS FAVORITOS */}
             <button
               type="button"
               onClick={() => setSoloFavoritos(!soloFavoritos)}
@@ -299,7 +366,7 @@ export default function Gallery({ armazones, cargando }: GalleryProps) {
               type="text"
               value={busqueda}
               onChange={(e) => setBusqueda(e.target.value)}
-              placeholder="Buscar por marca, modelo, código SKU, color, material o estilo (ej: Ray-Ban, Acetato, Aviador, Cat-Eye)..."
+              placeholder="Buscar por marca, modelo, código SKU, material o estilo (ej: Ray-Ban, Acetato, Aviador, Cat-Eye)..."
               className="w-full bg-[#001529] border border-white/10 rounded-2xl py-3.5 pl-12 pr-10 text-sm text-white placeholder-neutral-500 focus:border-[#c5a059] outline-none transition-all shadow-inner"
             />
             {busqueda && (
@@ -317,7 +384,7 @@ export default function Gallery({ armazones, cargando }: GalleryProps) {
           {/* BARRA DE PÍLDORAS DE FILTRO RÁPIDO */}
           <div className="flex flex-wrap items-center gap-2 pt-1 border-t border-white/5 text-xs">
             <span className="text-[10px] text-neutral-400 uppercase tracking-widest font-bold mr-1">
-              Filtros rápidos:
+              Filtros:
             </span>
 
             {[
@@ -346,7 +413,7 @@ export default function Gallery({ armazones, cargando }: GalleryProps) {
               );
             })}
 
-            {/* BOTÓN SOLO EN STOCK (FEATURE #5) */}
+            {/* BOTÓN SOLO EN STOCK */}
             <button
               type="button"
               onClick={() => setSoloStock(!soloStock)}
@@ -393,7 +460,7 @@ export default function Gallery({ armazones, cargando }: GalleryProps) {
               </select>
             </div>
 
-            {/* 2. Género / Estilo */}
+            {/* 2. Género */}
             <div className="space-y-1">
               <label className="text-[10px] uppercase tracking-wider text-neutral-400 font-bold block">
                 Género
@@ -411,7 +478,7 @@ export default function Gallery({ armazones, cargando }: GalleryProps) {
               </select>
             </div>
 
-            {/* 3. Material */}
+            {/* 3. Material (Puro sin colores) */}
             <div className="space-y-1">
               <label className="text-[10px] uppercase tracking-wider text-neutral-400 font-bold block">
                 Material
@@ -423,9 +490,9 @@ export default function Gallery({ armazones, cargando }: GalleryProps) {
               >
                 <option value="todos">Todos los materiales</option>
                 <option value="acetato">Acetato</option>
-                <option value="metal">Metal / Alambre</option>
-                <option value="tr90">TR90 / Polímero</option>
-                <option value="hibrido">Combinado / Híbrido</option>
+                <option value="metal">Metal</option>
+                <option value="tr90">TR90</option>
+                <option value="hibrido">Combinado</option>
               </select>
             </div>
 
@@ -471,7 +538,8 @@ export default function Gallery({ armazones, cargando }: GalleryProps) {
         {/* BARRA DE CONTEO Y ESTADO */}
         <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3 text-xs text-neutral-400 px-1">
           <p className="font-semibold text-neutral-300">
-            Mostrando <span className="text-[#c5a059] font-bold">{armazonesOrdenados.length}</span> armazones
+            Mostrando <span className="text-[#c5a059] font-bold">{armazonesVisibles.length}</span> de{" "}
+            <span className="text-white font-bold">{armazonesOrdenados.length}</span> armazones
             {soloFavoritos && " guardados en tus favoritos ❤️"}
           </p>
 
@@ -493,13 +561,13 @@ export default function Gallery({ armazones, cargando }: GalleryProps) {
             {[1, 2, 3, 4, 5, 6].map((n) => (
               <div
                 key={n}
-                className="animate-pulse bg-[#021120] border border-white/5 rounded-3xl p-5 h-[480px] flex flex-col justify-between"
+                className="animate-pulse bg-[#021120] border border-white/5 rounded-3xl p-5 h-[440px] flex flex-col justify-between"
               >
-                <div className="w-full h-48 bg-white/5 rounded-2xl" />
+                <div className="w-full h-44 bg-white/5 rounded-2xl" />
                 <div className="space-y-3">
                   <div className="w-1/3 h-4 bg-white/5 rounded" />
                   <div className="w-3/4 h-6 bg-white/5 rounded" />
-                  <div className="w-full h-12 bg-white/5 rounded-xl" />
+                  <div className="w-full h-10 bg-white/5 rounded-xl" />
                 </div>
               </div>
             ))}
@@ -530,9 +598,9 @@ export default function Gallery({ armazones, cargando }: GalleryProps) {
             </button>
           </div>
         ) : (
-          /* GRID PROFESIONAL DE ARMAZONES */
+          /* GRID PROFESIONAL DE ARMAZONES SIN REDUNDANCIAS */
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {armazonesOrdenados.map((lente, i) => {
+            {armazonesVisibles.map((lente, i) => {
               const esFavorito = favoritos.includes(lente.id);
               const imgIndex = imagenesActivas[lente.id] || 0;
               const imagenPrincipal = lente.imagenes[imgIndex] || lente.imagen;
@@ -540,41 +608,43 @@ export default function Gallery({ armazones, cargando }: GalleryProps) {
               return (
                 <motion.div
                   key={lente.id}
-                  initial={{ opacity: 0, y: 20 }}
+                  initial={{ opacity: 0, y: 15 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, amount: 0.1 }}
-                  transition={{ duration: 0.5, delay: (i % 3) * 0.08 }}
+                  transition={{ duration: 0.4, delay: (i % 3) * 0.05 }}
                   className="group relative bg-[#021120]/90 border border-white/10 hover:border-[#c5a059]/40 rounded-3xl p-5 shadow-2xl flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 backdrop-blur-xl"
                 >
                   <div>
-                    {/* CABECERA DE LA TARJETA: SKU + GÉNERO + FAVORITO */}
+                    {/* CABECERA DE LA TARJETA: SKU + MATERIAL PURO + GÉNERO + FAVORITO */}
                     <div className="flex items-center justify-between mb-3">
-                      <span className="text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-[#c5a059]/10 text-[#c5a059] font-bold border border-[#c5a059]/25 tracking-wider">
-                        {lente.sku}
-                      </span>
-
-                      <div className="flex items-center gap-2">
-                        <span className="text-[10px] uppercase font-bold tracking-widest px-2.5 py-0.5 rounded-full bg-white/5 border border-white/10 text-neutral-400">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-[#c5a059]/10 text-[#c5a059] font-bold border border-[#c5a059]/25 tracking-wider">
+                          {lente.sku}
+                        </span>
+                        <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-neutral-300">
+                          {lente.material}
+                        </span>
+                        <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-neutral-400">
                           {lente.genero || "Unisex"}
                         </span>
-
-                        {/* BOTÓN FAVORITOS (FEATURE #4) */}
-                        <button
-                          type="button"
-                          onClick={(e) => toggleFavorito(lente.id, e)}
-                          className={`p-2 rounded-full border transition-all ${
-                            esFavorito
-                              ? "bg-rose-500/20 border-rose-500/50 text-rose-400 shadow-md shadow-rose-500/20"
-                              : "bg-white/5 border-white/10 text-neutral-400 hover:text-rose-400 hover:border-rose-400/30"
-                          }`}
-                          title={esFavorito ? "Quitar de favoritos" : "Guardar en favoritos"}
-                        >
-                          <Heart
-                            size={14}
-                            className={esFavorito ? "fill-rose-400" : ""}
-                          />
-                        </button>
                       </div>
+
+                      {/* BOTÓN FAVORITOS */}
+                      <button
+                        type="button"
+                        onClick={(e) => toggleFavorito(lente.id, e)}
+                        className={`p-2 rounded-full border transition-all ${
+                          esFavorito
+                            ? "bg-rose-500/20 border-rose-500/50 text-rose-400 shadow-md shadow-rose-500/20"
+                            : "bg-white/5 border-white/10 text-neutral-400 hover:text-rose-400 hover:border-rose-400/30"
+                        }`}
+                        title={esFavorito ? "Quitar de favoritos" : "Guardar en favoritos"}
+                      >
+                        <Heart
+                          size={14}
+                          className={esFavorito ? "fill-rose-400" : ""}
+                        />
+                      </button>
                     </div>
 
                     {/* ESCENARIO FOTOGRÁFICO DE ALTA VISIBILIDAD */}
@@ -600,7 +670,7 @@ export default function Gallery({ armazones, cargando }: GalleryProps) {
 
                       {/* HOVER OVERLAY DE FICHA RÁPIDA */}
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover/img:opacity-100 transition-opacity duration-300 flex items-end justify-center pb-3">
-                        <span className="text-[11px] text-white font-bold flex items-center gap-1.5 bg-[#c5a059] text-black px-3 py-1 rounded-full shadow-lg">
+                        <span className="text-[11px] font-bold flex items-center gap-1.5 bg-[#c5a059] text-black px-3 py-1 rounded-full shadow-lg">
                           <Eye size={13} />
                           <span>Ver Ficha Técnica</span>
                         </span>
@@ -634,7 +704,7 @@ export default function Gallery({ armazones, cargando }: GalleryProps) {
                       </div>
                     )}
 
-                    {/* MARCA, NOMBRE Y ESTILO */}
+                    {/* MARCA Y NOMBRE (SIN REPETIR TEXTOS) */}
                     <div className="space-y-1 mb-3">
                       <span className="text-[10px] font-black uppercase tracking-[0.25em] text-[#c5a059] block">
                         {lente.marca}
@@ -649,7 +719,7 @@ export default function Gallery({ armazones, cargando }: GalleryProps) {
 
                     {/* GRILLA DE MEDIDAS ÓPTICAS (LOS 3 BADGES CLAVE) */}
                     {lente.calibre && lente.puente && lente.varilla ? (
-                      <div className="grid grid-cols-3 gap-1.5 mb-3 text-center text-[10px] font-mono">
+                      <div className="grid grid-cols-3 gap-1.5 mb-4 text-center text-[10px] font-mono">
                         <div className="p-1.5 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-300">
                           <span className="text-[8px] uppercase tracking-wider block text-blue-400/80 font-sans font-bold">
                             Aro
@@ -671,28 +741,12 @@ export default function Gallery({ armazones, cargando }: GalleryProps) {
                       </div>
                     ) : null}
 
-                    {/* ATRIBUTOS: COLOR Y MATERIAL */}
-                    <div className="space-y-1 bg-[#001529]/70 p-2.5 rounded-xl border border-white/5 text-[11px] text-neutral-300 mb-4">
-                      <div className="flex items-center justify-between">
-                        <span className="text-neutral-500">Color:</span>
-                        <span className="font-medium text-white truncate max-w-[170px]" title={lente.color}>
-                          {lente.color}
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-neutral-500">Material:</span>
-                        <span className="font-medium text-white truncate max-w-[170px]" title={lente.material}>
-                          {lente.material}
-                        </span>
-                      </div>
-                    </div>
-
                   </div>
 
                   {/* PIE DE TARJETA: PRECIO + STOCK + BOTONES DE ACCIÓN */}
                   <div className="pt-3 border-t border-white/10 space-y-3">
                     
-                    {/* PRECIO & BADGE DE STOCK (FEATURE #5) */}
+                    {/* PRECIO & BADGE DE STOCK */}
                     <div className="flex items-center justify-between">
                       <div>
                         <span className="text-[9px] uppercase tracking-wider text-neutral-400 block font-bold">
@@ -730,10 +784,10 @@ export default function Gallery({ armazones, cargando }: GalleryProps) {
                       </div>
                     </div>
 
-                    {/* BOTONES DE ACCIÓN (FEATURE #1: COTIZAR CON CRISTALES) */}
+                    {/* BOTONES DE ACCIÓN */}
                     <div className="grid grid-cols-6 gap-2">
                       
-                      {/* BOTÓN COTIZAR CON CRISTALES (FEATURE #1) */}
+                      {/* BOTÓN COTIZAR CON CRISTALES */}
                       <button
                         type="button"
                         onClick={(e) => handleCotizarCristales(lente, e)}
@@ -785,19 +839,53 @@ export default function Gallery({ armazones, cargando }: GalleryProps) {
           </div>
         )}
 
+        {/* BOTÓN CARGAR MÁS / PAGINACIÓN INTELIGENTE (+100 MODELOS) */}
+        {!cargando && armazonesOrdenados.length > limiteVisible && (
+          <div className="flex flex-col items-center justify-center pt-8 pb-4 gap-3 border-t border-white/5">
+            <button
+              type="button"
+              onClick={() => setLimiteVisible((prev) => prev + 9)}
+              className="px-8 py-3.5 rounded-full bg-[#c5a059] hover:bg-[#dfba75] text-black font-black text-xs uppercase tracking-wider transition-all shadow-lg shadow-[#c5a059]/10 active:scale-95 flex items-center gap-2"
+            >
+              <span>Cargar más modelos (+9)</span>
+              <ArrowRight size={14} />
+            </button>
+            <div className="flex items-center gap-3 text-xs text-neutral-400">
+              <span>
+                Mostrando <strong className="text-white">{limiteVisible}</strong> de{" "}
+                <strong className="text-white">{armazonesOrdenados.length}</strong> armazones
+              </span>
+              <span>•</span>
+              <button
+                type="button"
+                onClick={() => setLimiteVisible(armazonesOrdenados.length)}
+                className="text-[#c5a059] hover:underline font-bold"
+              >
+                Ver todos
+              </button>
+            </div>
+          </div>
+        )}
+
       </div>
 
       {/* ============================================================== */}
-      {/* MODAL 1: FICHA TÉCNICA HD DEL ARMAZÓN                          */}
+      {/* MODAL 1: FICHA TÉCNICA HD (PORTAL A BODY CON POSICIÓN FIJA)   */}
       {/* ============================================================== */}
-      <AnimatePresence>
-        {modalLente && (
-          <div className="fixed inset-0 z-[200] flex items-center justify-center p-3 sm:p-6 bg-black/85 backdrop-blur-md overflow-y-auto">
+      {isMounted &&
+        modalLente &&
+        createPortal(
+          <div
+            className="fixed inset-0 z-[99999] flex items-center justify-center p-3 sm:p-6 bg-black/85 backdrop-blur-md"
+            onClick={() => setModalLente(null)}
+          >
             <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative w-full max-w-4xl bg-[#021120] border border-[#c5a059]/30 rounded-3xl shadow-2xl overflow-hidden my-auto max-h-[92vh] flex flex-col"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.2 }}
+              onClick={(e) => e.stopPropagation()}
+              className="relative w-full max-w-4xl bg-[#021120] border border-[#c5a059]/30 rounded-3xl shadow-2xl overflow-hidden my-auto max-h-[90vh] flex flex-col"
             >
               {/* HEADER DEL MODAL */}
               <div className="sticky top-0 z-20 bg-[#021120]/95 backdrop-blur-md border-b border-white/10 px-6 py-4 flex items-center justify-between">
@@ -810,7 +898,7 @@ export default function Gallery({ armazones, cargando }: GalleryProps) {
                       {modalLente.nombre}
                     </h3>
                     <p className="text-[11px] text-neutral-400">
-                      {modalLente.marca} • {modalLente.genero || "Unisex"}
+                      {modalLente.marca} • {modalLente.material} • {modalLente.genero || "Unisex"}
                     </p>
                   </div>
                 </div>
@@ -903,15 +991,11 @@ export default function Gallery({ armazones, cargando }: GalleryProps) {
                       </div>
                     </div>
 
-                    {/* TABLA DE ATRIBUTOS */}
+                    {/* TABLA DE ATRIBUTOS LIMPIA */}
                     <div className="space-y-2 bg-[#001529]/60 p-4 rounded-2xl border border-white/5">
                       <div className="flex justify-between py-1 border-b border-white/5">
                         <span className="text-neutral-400">Material:</span>
                         <span className="font-semibold text-white">{modalLente.material}</span>
-                      </div>
-                      <div className="flex justify-between py-1 border-b border-white/5">
-                        <span className="text-neutral-400">Color:</span>
-                        <span className="font-semibold text-white">{modalLente.color}</span>
                       </div>
                       <div className="flex justify-between py-1 border-b border-white/5">
                         <span className="text-neutral-400">Estilo:</span>
@@ -981,21 +1065,27 @@ export default function Gallery({ armazones, cargando }: GalleryProps) {
               </div>
 
             </motion.div>
-          </div>
+          </div>,
+          document.body
         )}
-      </AnimatePresence>
 
       {/* ============================================================== */}
-      {/* MODAL 2: GUÍA VISUAL "¿CÓMO SABER TU MEDIDA?" (FEATURE #2)     */}
+      {/* MODAL 2: GUÍA VISUAL "¿CÓMO SABER TU MEDIDA?" (PORTAL A BODY)  */}
       {/* ============================================================== */}
-      <AnimatePresence>
-        {modalMedidasAbierto && (
-          <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
+      {isMounted &&
+        modalMedidasAbierto &&
+        createPortal(
+          <div
+            className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md"
+            onClick={() => setModalMedidasAbierto(false)}
+          >
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="relative w-full max-w-lg bg-[#021120] border border-[#c5a059]/40 rounded-3xl p-6 md:p-8 shadow-2xl space-y-6 text-white"
+              transition={{ duration: 0.2 }}
+              onClick={(e) => e.stopPropagation()}
+              className="relative w-full max-w-lg bg-[#021120] border border-[#c5a059]/40 rounded-3xl p-6 md:p-8 shadow-2xl space-y-6 text-white max-h-[90vh] overflow-y-auto"
             >
               <button
                 type="button"
@@ -1025,7 +1115,7 @@ export default function Gallery({ armazones, cargando }: GalleryProps) {
                     <span className="text-[10px] uppercase font-mono">Ancho del lente</span>
                   </div>
                   <p className="text-neutral-300 font-light text-[11px]">
-                    Es el ancho horizontal de cada cristal. Menos de 50mm es para caras delgadas/chicas, 50-52mm es estándar, y más de 52mm es amplio u oversize.
+                    Es el ancho horizontal de cada cristal. Menos de 50mm es para caras delgadas o chicas, 50-52mm es el tamaño estándar habitual, y más de 52mm es amplio u oversize.
                   </p>
                 </div>
 
@@ -1035,7 +1125,7 @@ export default function Gallery({ armazones, cargando }: GalleryProps) {
                     <span className="text-[10px] uppercase font-mono">Apoyo nasal</span>
                   </div>
                   <p className="text-neutral-300 font-light text-[11px]">
-                    La distancia entre ambos cristales sobre la nariz. Suele rondar entre 16mm y 21mm según tu fisonomía.
+                    La distancia entre ambos cristales sobre la nariz. Suele rondar entre 16mm y 21mm según la fisonomía.
                   </p>
                 </div>
 
@@ -1050,7 +1140,7 @@ export default function Gallery({ armazones, cargando }: GalleryProps) {
                 </div>
               </div>
 
-              {/* TIP CLAVE DE ÓPTICA DANNY */}
+              {/* EL TRUCO DE ÓPTICA DANNY */}
               <div className="p-4 rounded-2xl bg-[#c5a059]/10 border border-[#c5a059]/30 text-xs text-neutral-300 space-y-1">
                 <span className="text-[#c5a059] font-black uppercase text-[10px] tracking-wider block">
                   💡 El truco infalible:
@@ -1068,9 +1158,9 @@ export default function Gallery({ armazones, cargando }: GalleryProps) {
                 Entendido, ver catálogo
               </button>
             </motion.div>
-          </div>
+          </div>,
+          document.body
         )}
-      </AnimatePresence>
 
     </div>
   );
